@@ -1,0 +1,66 @@
+# 雀彩 v0.5.7 Cloudflare Workers + Durable Objects 対応版
+
+制作：一ノ瀬キラ
+
+PC・スマホ・PWAに対応した既存の雀彩 v0.5.7を、CloudflareのWebSocket経由で友人同士オンライン対局できるようにするための改修版です。従来のCPU対局、3D牌、ルール・キャラクター画像は維持しています。
+
+**重要：このZIPは公開済みではありません。** Cloudflareのアカウントで初回デプロイが必要です。また、コードの模擬通信テストは通過していますが、実際のCloudflareデプロイ／実端末間での本番通信テストは未完了です。
+
+## いちばん簡単な公開方法：GitHub連携（以後は自動更新）
+
+1. ZIPを解凍し、`public`、`src`、`wrangler.jsonc`、`package.json`、`tests` などを含む**プロジェクト一式**をGitHubの新規リポジトリに登録。リポジトリは**Private（非公開）**で構いません。ZIPファイルそのものだけを登録するのは不可。
+   - GitHub Desktopを使うなら、解凍フォルダをリポジトリとして追加→コミット→GitHubへ公開（Private）。
+   - **`public` の中身をリポジトリ直下へ出さない**こと。階層はそのまま。
+2. [Cloudflare](https://dash.cloudflare.com/) で**無料（Workers Free）**アカウントを用意。
+3. **Workers & Pages → Create application（アプリ作成）→ Import a repository（リポジトリを取り込む）**を選び、GitHubを接続。
+4. ①で作ったリポジトリを選択。次の設定でデプロイ。
+   - **Workers**を選択。**Pagesの静的サイト専用アップロードではない**。
+   - Worker名（アプリ名）は **`jansai-online`** にする（`wrangler.jsonc` の `name` と一致させる）。
+   - Root directory（ルートディレクトリ）：`/`（リポジトリの最上位）
+   - Build command（ビルドコマンド）：**空欄**
+   - Deploy command：`npx wrangler deploy`（標準設定）
+   - Framework preset：None / 該当なし（選択欄がある場合）
+   - 追加のDBやRedis、環境変数、APIキーは不要。
+5. ビルドが成功すると、`https://jansai-online.<Cloudflareのサブドメイン>.workers.dev/` のようなHTTPS URLが発行されます。
+6. まず公開URL末尾に `/api/health` を付け、`{"ok":true,"service":"jansai-online","protocol":2}` が表示されればAPI入口まで配信できています。
+7. 本番の確認：PCで公開URLへ→「オンライン卓を作る」→卓コードが表示→コピーした招待URLを**別端末／別ブラウザ**で開き名前入力→2人以上で「空席をCPUにして開始」。
+
+以後はGitHubに変更をコミットするだけで、Cloudflare Workers Buildsが自動で再デプロイします。GitHub ActionsやVercel、別のRedis契約は不要です。
+
+**注意：** Cloudflareの画面表示や項目名は変わる場合があります。`wrangler.jsonc` はすでにWorkers・Durable Objects（SQLite）・公開静的ファイルを設定済みなので、Cloudflareで新たにDurable Objectsを手動作成する必要はありません。
+
+## 代替：Windowsでワンクリック公開
+
+Node.jsをインストール済みなら、`公開する.cmd` を実行してください。依存ツールの導入・テスト・Cloudflareログイン・公開を順に行います。デプロイ後は画面に表示された workers.dev URLへアクセス。GitHub連携を使う場合、この手順は不要です。
+
+## 主要ファイル
+
+| ファイル | 役割 |
+| --- | --- |
+| `public/` | 従来の雀彩（CPU・3D・スマホ表示・PWA）＋Cloudflare版 `online.js` |
+| `src/index.js` | Cloudflare Worker（ルーム接続・URL検証）／Durable Object（参加管理・手牌秘匿ビュー配信・保存） |
+| `wrangler.jsonc` | Worker、静的ファイル、SQLite型Durable Objectの配備設定 |
+| `package.json` | Wrangler、ローカル検証・公開用コマンド |
+| `tests/room.test.mjs` | 通信・認証・席情報の秘匿・再接続・保存の自動テスト |
+
+## スマホとPWA
+
+PC／スマホで同じ公開URLから遊べます。Androidは対応ブラウザの「インストール」／「ホーム画面に追加」、iPhoneはSafariの共有→「ホーム画面に追加」。スマホは横向きを推奨します。オンライン対局には通信環境が必要です。PWAでオフライン起動できても、友人との対局はオフラインでは使えません。
+
+## 現時点の制約（必ず確認）
+
+- **対局のルール判定は、従来どおりホストのブラウザ内**で実行。Durable Objectsは卓ごとの参加者・同期・**席ごとの最新表示状態**を保存します。まだ麻雀エンジン全体の権威あるサーバー実行・完全な対局保存はしていません。
+- **ホストが画面を閉じたりリロードすると対局は続けられません。** 短時間のネット切断でホストの画面自体が生きていれば再接続できます。ゲストは同一ブラウザの再接続で席と直近画面を復元できます。
+- この段階では、対局後の全局面履歴をサーバーに保存する機能や、ホスト交代・観戦・不正操作の完全排除は未実装。対局終了後に新しい卓を作成してください。
+- ルーム認証は推測しづらい卓コードと端末ごとの32文字トークンを使います。招待URLは友人にだけ共有してください。氏名・パスワード等のログインはありません。
+- 放置された卓データは、約24時間後に自動整理される設計です（接続中は延期）。対局ログの永久保管には使いません。
+- 無料枠のリクエスト・実行時間・ストレージはアカウント内の他Workerとも共通部分があるため、Cloudflare Dashboardで利用量を確認してください。無料枠超過で通信停止する可能性があります。
+- 本番環境でのWorkersのビルド、Cloudflare実WebSocket、スマホ実機、異回線の通信・PWAインストール確認は**未実施**です。公開後、最初に2端末で確認してください。
+
+## ローカル検証
+
+`node --test tests/room.test.mjs` でシミュレーションテスト（Node.jsのみ）を実行できます。
+
+Wranglerがインストールされていれば `npm run dev` → `http://localhost:8787/` から、Cloudflare互換のローカル環境で確認できます。`npm run check` で構文チェックと自動テストをまとめて実行します。
+
+GitHub公開後の更新では、**Git管理データ（.git）は消さずに**改修済みファイルを上書き→コミットしてください。

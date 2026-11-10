@@ -1,0 +1,118 @@
+#sceneHost{display:none;position:fixed;left:195px;right:0;top:0;bottom:0;z-index:3;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#0d232b,#020a12 80%)}
+body.scene-live #sceneHost{display:block}
+#sceneHost canvas{width:100%;height:100%;display:block;touch-action:none}
+body.scene-live #tb{visibility:hidden;pointer-events:none}
+body.scene-live .discard-flight{display:none!important}
+body.scene-live #actionArea{visibility:visible;pointer-events:auto;position:fixed!important;left:45%!important;right:9%!important;top:auto!important;bottom:17%!important;width:auto!important;z-index:50!important;transform:none!important}
+body.scene-live #act{justify-content:center}
+body.scene-live .decision-bar{justify-content:center}
+body.scene-live #actionArea button{font-size:14px;padding:7px 18px;border-radius:20px;min-height:35px}
+body.scene-live #leftPane{position:fixed;left:12px;top:12px;width:178px;z-index:30}
+body.scene-live #ruleSummary{position:fixed;left:12px;top:105px;width:178px;min-height:0}
+body.scene-live #rightPane{position:fixed!important;right:10px;top:10px;width:240px;z-index:120!important}
+body.scene-live #toolDock{left:12px!important;bottom:12px;width:178px}
+body.scene-live .site-header{position:relative;z-index:30}
+body.scene-live #tableHand{pointer-events:none}
+#toolPanel{max-height:calc(100dvh - 100px);overflow-y:auto}
+#rendererChoice,#cameraPreset{display:block;width:100%;margin:6px 0 10px;background:#102e2d;color:#f4dfb2;border:1px solid #a98b52;border-radius:7px;padding:7px}
+#rendererStatus{font-size:11px;line-height:1.5;color:#c9c4ac}
+#sceneHUD{position:absolute;inset:0;pointer-events:none;z-index:3}
+.scene-seat{position:absolute;display:flex;align-items:center;gap:9px;transform:translate(-50%,-50%);background:linear-gradient(135deg,#15313ae8,#030b12ed);border:1px solid #bca16a;border-radius:12px;padding:7px 11px 7px 7px;min-width:145px;color:#fff3d3;box-shadow:0 8px 14px #0009,inset 0 1px 1px #fff3;font-family:serif}
+.scene-seat.active{border-color:#ffe4a1;box-shadow:0 0 12px #f6c46b6b,0 8px 14px #0009}
+.scene-avatar{width:47px;height:53px;flex:none;border-radius:8px;border:1px solid #e4bf77;background-position:center;background-size:cover}
+.scene-seat strong{display:block;font-size:13px;white-space:nowrap}
+.scene-score{font-size:23px;line-height:1.2;color:#ffe1a1;font-weight:bold;white-space:nowrap}
+.scene-wind{display:inline-flex;align-items:center;justify-content:center;margin-right:6px;background:linear-gradient(#ffe4a4,#b98540);color:#2a190b;border-radius:5px;width:24px;height:25px;font-size:18px}
+.scene-dealer{font-size:11px;color:#ffd377;margin-left:5px}
+#sceneHint{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);font-size:11px;color:#b5bcb8;white-space:nowrap;pointer-events:none}
+#sceneTimer{position:absolute;right:4%;bottom:11%;padding:7px 14px;border:1px solid #d4b275;border-radius:22px;color:#f6d998;background:#041219da;font-size:14px}
+#sceneDora{position:absolute;left:22px;top:18px;display:flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid #aa8952;background:#06171fe8;color:#f6dca3;border-radius:12px;font-size:13px;box-shadow:0 6px 12px #0008}
+#sceneDora img{width:28px;height:37px;background:#f1dec4;border-radius:4px;box-shadow:1px 2px 1px #8b221b}
+#sceneKeys{position:absolute;inset:0;pointer-events:none}
+.scene-key{position:absolute;opacity:0;pointer-events:none;border:2px solid #ffe2a3;background:transparent;color:transparent;padding:0;min-height:0}
+.scene-key:focus-visible{opacity:1;outline:2px solid #fff;outline-offset:2px}
+body.scene-live .rematch-row{position:fixed;bottom:32%;left:50%;z-index:100}
+@media(max-width:1300px){#sceneHost{left:178px}body.scene-live #leftPane,body.scene-live #ruleSummary,body.scene-live #toolDock{width:160px}.scene-seat{min-width:118px;padding:5px;gap:5px}.scene-avatar{width:36px;height:43px}.scene-score{font-size:19px}.scene-seat strong{font-size:11px}}
+body.scene-live #actionArea{bottom:26%!important;pointer-events:none!important;justify-content:center!important}
+body.scene-live #actionArea button,body.scene-live #actionArea .info-dialog{pointer-events:auto}
+body.scene-live #act{justify-content:center!important}
+#sceneKeys .scene-key{opacity:0!important;pointer-events:none!important}
+#sceneKeys .scene-key:focus-visible:not(:disabled){opacity:1!important}
+/* v0.5.1: readable table HUD and independent controls */
+body.scene-live #ruleSummary{top:96px;padding:12px;max-height:calc(100dvh - 166px);overflow:auto}
+#ruleSummary>summary{font-size:18px;font-weight:800;color:#ffe1a1;cursor:pointer;list-style:none}
+#ruleSummary>summary::after{content:' ▾';font-size:12px}#ruleSummary:not([open])>summary::after{content:' ▸'}
+body.scene-live #ruleSummary #seatNotice{font-size:11px;margin:7px 0}
+body.scene-live #ruleSummary #ruleText .rule-line{padding:7px 0;gap:4px;font-size:12px;line-height:1.35}
+body.scene-live #matchSettings{display:none}
+body.scene-live .scene-avatar{width:48px;height:48px;box-sizing:border-box;background-size:125%;background-position:55% 65%;background-repeat:no-repeat;background-origin:border-box;overflow:hidden}
+#sceneDora{top:12px;left:15px;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:8px 10px;max-width:210px}
+.scene-dora-row{display:flex;gap:6px;align-items:center;white-space:nowrap}.scene-dora-meta{border-top:1px solid #ad8c4e66;padding-top:5px;text-align:center;white-space:nowrap}
+#sceneDora img{width:25px;height:34px}
+#sceneTimer{right:auto;bottom:auto;white-space:nowrap;font-size:13px;padding:6px 9px;transform:none}
+#sceneHint{display:none}
+body.scene-live #toolDock{position:fixed!important;left:calc(50% + 60px)!important;top:auto!important;bottom:4px!important;transform:translateX(-50%);width:180px;z-index:90}
+body.scene-live #toolMove{display:none}body.scene-live #toolToggle{font-size:13px;padding:6px 13px;min-height:32px}
+body.scene-live #toolPanel{position:absolute!important;left:50%!important;right:auto!important;top:auto!important;bottom:40px!important;transform:translateX(-50%);width:240px;max-height:65vh;padding:10px}
+body.scene-live #toolPanel .tool-title{display:none}
+#displayDock{position:fixed;left:12px;bottom:10px;width:178px;z-index:110;color:#ffe1a1}
+#displayDock>summary{list-style:none;border:1px solid #bd9a61;border-radius:10px;background:#0b202b;padding:11px 8px;cursor:pointer;font-size:14px;text-align:center}
+#displayDock .display-panel{position:absolute;left:0;bottom:46px;width:235px;padding:10px;background:#081f29;border:1px solid #b89760;border-radius:10px;max-height:75dvh;overflow:auto}
+#displayDock button{width:100%;margin-top:5px;padding:8px;font-size:12px}#displayDock .visual-controls{margin:0 0 6px}
+body.scene-live #rightPane{width:auto!important;max-width:none!important;right:12px;top:10px;display:flex!important;align-items:flex-start;gap:8px;background:none!important;border:0!important;padding:0!important;box-shadow:none!important;overflow:visible!important}
+body.scene-live #rightPane .right-actions{display:block;padding:0!important;overflow:visible;height:auto!important;width:235px;background:none;border:0;box-shadow:none}
+body.scene-live #rightPane:has(.rules[open]) .right-actions{width:min(460px,calc(100vw - 100px))}
+body.scene-live #rightPane .rules[open]{height:auto;max-height:85vh;overflow-y:auto}
+body.scene-live #rightPane .rules .help-scroll{padding:6px 10px 10px}
+body.scene-live #rightPane .help-block p,body.scene-live #rightPane .help-effect{font-size:14px;line-height:1.5}
+body.scene-live #rightPane .help-block h3{font-size:15px}
+body.scene-live #rightPane .help-effect{grid-template-columns:75px 1fr}
+.separate-actions{display:flex;gap:7px;align-items:center}.separate-actions #jrOpenHistory{position:static!important;margin:0!important;width:auto!important;padding:9px 12px;min-height:39px;border:1px solid #bb9861;border-radius:9px;background:#0c222d;font-size:12px;color:#ffe1aa}
+.separate-actions #returnSetup{position:static!important;width:39px;height:39px;margin:0!important}
+#kanSamples{width:min(1100px,95vw);padding:20px;border:1px solid #cfa85d;border-radius:18px;color:#fce7bf;background:#081d26;box-sizing:border-box}
+#kanSamples::backdrop{background:#000b}#kanSamples h2{margin:0 0 8px;font-size:24px}#kanSamples p{font-size:14px;color:#d3dbd7}#kanSamples .kan-close{float:right}#kanSampleCanvas{width:100%;display:block;border:1px solid #716547;border-radius:12px}
+.kan-captions{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;text-align:center;font-size:14px}.kan-captions strong{display:block;font-size:20px;color:#ffdda1;margin:12px 0 4px}
+@media(max-width:1300px){#displayDock{width:160px}body.scene-live #ruleSummary #ruleText .rule-line{font-size:11px;padding:6px 0}.scene-seat{min-width:118px}.scene-avatar{width:39px!important;height:39px!important}}
+body.scene-live #rightPane{flex-direction:row!important;height:auto!important;max-height:none!important}
+body.scene-live #rightPane #returnSetup{position:static!important;right:auto!important;top:auto!important;flex:none}
+#kanSampleCanvas{width:100%!important;height:auto!important;max-width:100%}
+/* v0.5.1: annotated positions and unclipped full portraits */
+body.scene-live .scene-avatar{background-size:contain;background-position:center;width:48px;height:48px;border:0;box-shadow:none;border-radius:7px;background-color:#0b222a}
+body.scene-live #rightPane:has(.rules[open]) .right-actions{width:235px}
+body.scene-live #rightPane .rules[open]{overflow:visible;max-height:none}
+body.scene-live #rightPane .rules[open] .help-scroll{position:absolute;right:0;top:50px;width:310px;box-sizing:border-box;max-height:calc(100dvh - 78px)!important;overflow-y:auto!important;background:#071e29;border:1px solid #bf9f63;border-radius:10px;padding:7px}
+body.scene-live #rightPane .help-block{padding:8px;margin:5px 0}
+body.scene-live #rightPane .help-block p,body.scene-live #rightPane .help-effect{font-size:13px}
+body.scene-live #toolDock{bottom:auto!important;transform:none!important;width:74px!important}
+body.scene-live #toolToggle{font-size:12px;padding:8px 5px;white-space:normal;line-height:1.5}
+body.scene-live #toolPanel{left:0!important;bottom:60px!important;transform:none!important;width:112px;box-sizing:border-box;padding:6px}
+body.scene-live #toolPanel button{width:100%;box-sizing:border-box;font-size:11px;white-space:normal;padding:7px 4px}
+#displayDock .display-panel{width:100%;box-sizing:border-box;overflow-x:hidden;padding:7px}
+#displayDock .visual-controls{padding:6px;box-sizing:border-box;width:100%}
+#displayDock .visual-controls select,#displayDock .display-panel button{box-sizing:border-box;max-width:100%;min-width:0}
+#displayDock .visual-controls legend{font-size:11px}
+#sceneDora{min-width:150px;box-sizing:border-box}
+.scene-dora-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px}
+.scene-dora-meta>div{display:flex;flex-direction:column;align-items:center;gap:5px}
+.score-stick{display:flex;align-items:center;justify-content:center;width:63px;height:8px;box-sizing:border-box;background:linear-gradient(#fff9e8,#d9d7c7);border:1px solid #a7a69a;border-radius:3px;box-shadow:0 1px 2px #0008}
+.score-stick.thousand i{width:4px;height:4px;background:#b51125;border-radius:50%}
+.score-stick.hundred{display:grid;grid-template-rows:repeat(2,2px);grid-template-columns:repeat(4,2px);gap:1px;align-content:center;justify-content:center}
+.score-stick.hundred i{width:2px;height:2px;border-radius:50%;background:#152b29}
+#sceneEnd{position:fixed;z-index:75;width:205px;color:#ffdf9d;pointer-events:auto}
+#sceneEndTitle{font-size:17px;font-weight:bold;text-align:center;padding:6px;background:#102633;border:1px solid #aa8d56;border-radius:8px}
+body.scene-live #sceneEnd .rematch-row{position:static;max-height:none;overflow:visible;margin-top:7px}
+#sceneEnd #rematch{font-size:12px;padding:9px;width:100%;white-space:normal}
+/* Added kan is adjacent on the felt, never a vertical pile in the classic fallback. */
+.page-play .meld-zone .meld-unit>.t.stacked{top:auto!important;bottom:calc(100% + 2px)!important;left:0!important;filter:none!important}
+body.scene-live #sceneEnd #actionArea.end-actions{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;transform:none!important;margin:6px 0}
+body.scene-live #sceneEnd #actionArea.end-actions button{font-size:12px;max-width:100%;white-space:normal}
+
+body.scene-live #rightPane .rules[open] .help-scroll{position:fixed;right:12px;top:60px}
+#sceneDora{width:205px}
+
+#sceneWait{position:absolute;transform:translate(-50%,-100%);max-width:340px;padding:7px 12px;border:1px solid #bb9c5d;border-radius:8px;background:#091d29ee;color:#ffe7ad;font-size:13px;line-height:1.5;box-shadow:0 3px 8px #0006}
+body.pref-hide-waits #sceneWait{display:none}
+body.scene-live .scene-avatar{border:1px solid #e2be7a;border-radius:6px;box-sizing:border-box;background-repeat:no-repeat;background-size:contain}
+
+/* Fill avatar windows with the character; crop the baked-in inner frame. */
+.scene-avatar,.page-play .seat-avatar,.page-play .jr-card .jr-portrait,.page-play .jr-portrait{background-size:128%!important;background-position:50% 52%!important;background-repeat:no-repeat;overflow:hidden}
