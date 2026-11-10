@@ -4,6 +4,17 @@ import { DurableObject } from 'cloudflare:workers';
 // The original mahjong engine still runs on the host's device.
 // A Durable Object owns membership, private seat-view delivery and the latest saved views.
 const PROTOCOL = 2;
+// html_handling='none' preserves .html names but does not map '/' to index.html.
+// Resolve the root and previously canonicalized extensionless pages explicitly.
+const PAGE_ALIASES = Object.freeze({
+  '/': '/index.html',
+  '/index': '/index.html',
+  '/online': '/online.html',
+  '/room.html': '/jansuno-room-v0.5.7.html',
+  '/play.html': '/jansuno-play-v0.5.7.html',
+  '/jansuno-room-v0.5.7': '/jansuno-room-v0.5.7.html',
+  '/jansuno-play-v0.5.7': '/jansuno-play-v0.5.7.html',
+});
 const CODE = /^[A-HJ-NP-Z2-9]{8}$/;
 const TOKEN = /^[A-HJ-NP-Z2-9]{32}$/;
 const MAX_MESSAGE = 750_000;
@@ -42,6 +53,12 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api/health') return json({ok:true,service:'jansai-online',protocol:PROTOCOL});
+    const target = PAGE_ALIASES[url.pathname];
+    if (target) {
+      const assetUrl = new URL(url);
+      assetUrl.pathname = target;
+      return env.ASSETS.fetch(new Request(assetUrl, request));
+    }
     const match = /^\/api\/room\/([^/]+)$/.exec(url.pathname);
     if (!match) return env.ASSETS.fetch(request);
     if (!CODE.test(match[1])) return json({error:'卓コードが正しくありません'},400);

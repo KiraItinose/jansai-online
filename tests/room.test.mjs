@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { webcrypto } from 'node:crypto';
 import vm from 'node:vm';
 
@@ -34,7 +34,7 @@ const runtime=vm.runInNewContext(source+'\n({workerDefault,JansaiRoom});',{
   Response:TestResponse,
   WebSocketPair:class {constructor(){this[0]=new FakeSocket();this[1]=new FakeSocket();}},
   WebSocketRequestResponsePair:class {constructor(){}},
-  crypto:webcrypto,TextEncoder,URL,Date,console,structuredClone,
+  crypto:webcrypto,TextEncoder,URL,Request,Date,console,structuredClone,
 });
 const {workerDefault,JansaiRoom}=runtime;
 const A='A'.repeat(32),B='B'.repeat(32),C='C'.repeat(32),D='D'.repeat(32), CODE='ABCDEFGH';
@@ -52,6 +52,24 @@ test('Worker routes assets, health, and verifies WS origin, format, and method',
  assert.equal(health.status,200);
  assert.equal(JSON.parse(health.body).protocol,2);
  assert.deepEqual(await workerDefault.fetch(new Request('https://example.com/online.html'),env),{static:true});
+ const visited=[];
+ env.ASSETS.fetch=async request=>{visited.push(new URL(request.url));return {static:true}};
+ for(const [path,target] of Object.entries({
+  '/':'/index.html',
+  '/index':'/index.html',
+  '/online':'/online.html',
+  '/play.html':'/jansuno-play-v0.5.7.html',
+  '/room.html':'/jansuno-room-v0.5.7.html',
+  '/jansuno-play-v0.5.7':'/jansuno-play-v0.5.7.html',
+  '/jansuno-room-v0.5.7':'/jansuno-room-v0.5.7.html',
+ })) {
+  const response=await workerDefault.fetch(new Request('https://example.com'+path+'?q=1'),env);
+  assert.deepEqual(response,{static:true});
+  assert.equal(visited.at(-1).pathname,target);
+  assert.equal(visited.at(-1).search,'?q=1');
+ }
+ assert.deepEqual(await workerDefault.fetch(new Request('https://example.com/unknown.html'),env),{static:true});
+ assert.equal(visited.at(-1).pathname,'/unknown.html');
  assert.equal((await workerDefault.fetch(new Request('https://example.com/api/room/BAD'),env)).status,400);
  assert.equal((await workerDefault.fetch(new Request('https://example.com/api/room/'+CODE),env)).status,426);
  const req=new Request('https://example.com/api/room/'+CODE,{headers:{Upgrade:'websocket',Origin:'https://evil.example'}});
@@ -149,4 +167,23 @@ test('Abandoned rooms and latest private snapshots are removed by the cleanup al
  await room.alarm();
  assert.equal(await ctx.storage.get('room'),undefined);
  assert.equal(await ctx.storage.get('views'),undefined);
+});
+
+test('Published static routes and SW precache refer to existing assets',()=>{
+ const base=new URL('../public/',import.meta.url);
+ for(const name of ['index.html','online.html','jansuno-room-v0.5.7.html','jansuno-play-v0.5.7.html','sw.js']) {
+  assert.ok(existsSync(new URL(name,base)),`Missing page asset: ${name}`);
+ }
+ const lobby=readFileSync(new URL('index.html',base),'utf8');
+ assert.match(lobby, /data-standalone="true"/);
+ assert.ok(lobby.includes("location.href='online.html#'"));
+ assert.match(lobby, /'jansuno-play-v0\.5\.7\.html'/);
+ const precache=readFileSync(new URL('sw.js',base),'utf8');
+ const match=precache.match(/const FILES=(\[[^;]+\]);/);
+ assert.ok(match, 'Expected PWA precache entries');
+ const paths=JSON.parse(match[1].replaceAll("'",'"'));
+ for(const name of paths){
+  if(name==='./')continue;
+  assert.ok(existsSync(new URL(name,base)),`Missing precache asset: ${name}`);
+ }
 });
