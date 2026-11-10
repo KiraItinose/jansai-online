@@ -8,7 +8,21 @@ const actionArea=$('#actionArea'),actionParent=actionArea.parentNode,actionNext=
 const hud=$('#sceneHUD'),keys=$('#sceneKeys'),settings=document.createElement('div');settings.innerHTML='<label for="rendererChoice">卓の表示</label><select id="rendererChoice"><option value="webgl">3D卓</option><option value="classic">従来表示</option></select><label for="cameraPreset">3Dの視点</label><select id="cameraPreset"><option value="table">対局視点</option><option value="low">低い視点</option><option value="overhead">俯瞰視点</option></select><label for="sceneQuality">3D画質</label><select id="sceneQuality"><option value="standard">標準（推奨）</option><option value="high">高画質（従来）</option><option value="light">軽量（動作優先）</option></select><div id="rendererStatus" role="status"></div>';
 $('#tileView').parentElement.prepend(settings);const mode=$('#rendererChoice'),preset=$('#cameraPreset'),quality=$('#sceneQuality'),status=$('#rendererStatus');
 const displayDock=document.createElement('details');displayDock.id='displayDock';displayDock.innerHTML='<summary>卓と牌の表示</summary><div class="display-panel"></div>';document.body.append(displayDock);displayDock.querySelector('div').append($('#tileView').closest('fieldset'),$('#resetPositions'));
-$('#toolToggle').innerHTML='⚙ 対局中の切替';document.body.append($('#toolDock'));
+$('#toolToggle').innerHTML='⚙ 対局中の切替';
+// Keep the drag grip unmistakable even if an older stylesheet has temporarily been cached.
+const toolGrip=$('#toolMove');
+if(toolGrip){
+ toolGrip.textContent='↕ 移動';
+ toolGrip.title='ここをドラッグして「対局中の切替」を移動';
+ toolGrip.setAttribute('aria-label','対局中の切替をドラッグして移動');
+ toolGrip.style.setProperty('display','inline-flex','important');
+ toolGrip.style.setProperty('align-items','center');
+ toolGrip.style.setProperty('justify-content','center');
+ toolGrip.style.setProperty('min-width','68px');
+ toolGrip.style.setProperty('font-size','14px');
+ toolGrip.style.setProperty('white-space','nowrap');
+}
+document.body.append($('#toolDock'));
 const endBox=document.createElement('div');endBox.id='sceneEnd';endBox.innerHTML='<div id="sceneEndTitle" hidden>終局</div>';endBox.append($('.rematch-row'));document.body.append(endBox);new MutationObserver(()=>{$('#sceneEndTitle').hidden=$('#rematch').hidden;invalidate()}).observe($('#rematch'),{attributes:true,attributeFilter:['hidden']});
 const help=$('#rightPane .rules');const history=$('#jrOpenHistory'),exit=$('#returnSetup');const actions=document.createElement('div');actions.className='separate-actions';actions.append(history,exit);$('#rightPane').append(actions);
 let sunlight;
