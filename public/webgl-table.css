@@ -10,7 +10,7 @@ body.scene-live #actionArea button{font-size:14px;padding:7px 18px;border-radius
 body.scene-live #leftPane{position:fixed;left:12px;top:12px;width:178px;z-index:30}
 body.scene-live #ruleSummary{position:fixed;left:12px;top:105px;width:178px;min-height:0}
 body.scene-live #rightPane{position:fixed!important;right:10px;top:10px;width:240px;z-index:120!important}
-body.scene-live #toolDock{left:12px!important;bottom:12px;width:178px}
+
 body.scene-live .site-header{position:relative;z-index:30}
 body.scene-live #tableHand{pointer-events:none}
 #toolPanel{max-height:calc(100dvh - 100px);overflow-y:auto}
@@ -32,7 +32,7 @@ body.scene-live #tableHand{pointer-events:none}
 .scene-key{position:absolute;opacity:0;pointer-events:none;border:2px solid #ffe2a3;background:transparent;color:transparent;padding:0;min-height:0}
 .scene-key:focus-visible{opacity:1;outline:2px solid #fff;outline-offset:2px}
 body.scene-live .rematch-row{position:fixed;bottom:32%;left:50%;z-index:100}
-@media(max-width:1300px){#sceneHost{left:178px}body.scene-live #leftPane,body.scene-live #ruleSummary,body.scene-live #toolDock{width:160px}.scene-seat{min-width:118px;padding:5px;gap:5px}.scene-avatar{width:36px;height:43px}.scene-score{font-size:19px}.scene-seat strong{font-size:11px}}
+@media(max-width:1300px){#sceneHost{left:178px}body.scene-live #leftPane,body.scene-live #ruleSummary{width:160px}.scene-seat{min-width:118px;padding:5px;gap:5px}.scene-avatar{width:36px;height:43px}.scene-score{font-size:19px}.scene-seat strong{font-size:11px}}
 body.scene-live #actionArea{bottom:26%!important;pointer-events:none!important;justify-content:center!important}
 body.scene-live #actionArea button,body.scene-live #actionArea .info-dialog{pointer-events:auto}
 body.scene-live #act{justify-content:center!important}
@@ -51,9 +51,9 @@ body.scene-live .scene-avatar{width:48px;height:48px;box-sizing:border-box;backg
 #sceneDora img{width:25px;height:34px}
 #sceneTimer{right:auto;bottom:auto;white-space:nowrap;font-size:13px;padding:6px 9px;transform:none}
 #sceneHint{display:none}
-body.scene-live #toolDock{position:fixed!important;left:calc(50% + 60px)!important;top:auto!important;bottom:4px!important;transform:translateX(-50%);width:180px;z-index:90}
-body.scene-live #toolMove{display:none}body.scene-live #toolToggle{font-size:13px;padding:6px 13px;min-height:32px}
-body.scene-live #toolPanel{position:absolute!important;left:50%!important;right:auto!important;top:auto!important;bottom:40px!important;transform:translateX(-50%);width:240px;max-height:65vh;padding:10px}
+
+
+
 body.scene-live #toolPanel .tool-title{display:none}
 #displayDock{position:fixed;left:12px;bottom:10px;width:178px;z-index:110;color:#ffe1a1}
 #displayDock>summary{list-style:none;border:1px solid #bd9a61;border-radius:10px;background:#0b202b;padding:11px 8px;cursor:pointer;font-size:14px;text-align:center}
@@ -83,10 +83,10 @@ body.scene-live #rightPane .rules[open]{overflow:visible;max-height:none}
 body.scene-live #rightPane .rules[open] .help-scroll{position:absolute;right:0;top:50px;width:310px;box-sizing:border-box;max-height:calc(100dvh - 78px)!important;overflow-y:auto!important;background:#071e29;border:1px solid #bf9f63;border-radius:10px;padding:7px}
 body.scene-live #rightPane .help-block{padding:8px;margin:5px 0}
 body.scene-live #rightPane .help-block p,body.scene-live #rightPane .help-effect{font-size:13px}
-body.scene-live #toolDock{bottom:auto!important;transform:none!important;width:74px!important}
-body.scene-live #toolToggle{font-size:12px;padding:8px 5px;white-space:normal;line-height:1.5}
-body.scene-live #toolPanel{left:0!important;bottom:60px!important;transform:none!important;width:112px;box-sizing:border-box;padding:6px}
-body.scene-live #toolPanel button{width:100%;box-sizing:border-box;font-size:11px;white-space:normal;padding:7px 4px}
+
+
+
+
 #displayDock .display-panel{width:100%;box-sizing:border-box;overflow-x:hidden;padding:7px}
 #displayDock .visual-controls{padding:6px;box-sizing:border-box;width:100%}
 #displayDock .visual-controls select,#displayDock .display-panel button{box-sizing:border-box;max-width:100%;min-width:0}
@@ -116,3 +116,15 @@ body.scene-live .scene-avatar{border:1px solid #e2be7a;border-radius:6px;box-siz
 
 /* Fill avatar windows with the character; crop the baked-in inner frame. */
 .scene-avatar,.page-play .seat-avatar,.page-play .jr-card .jr-portrait,.page-play .jr-portrait{background-size:128%!important;background-position:50% 52%!important;background-repeat:no-repeat;overflow:hidden}
+
+/* v0.5.7 Cloudflare — movable, legible in-match switcher.
+   Keep position declarations non-important: saved inline drag coordinates must win. */
+body.page-play #toolDock{width:clamp(224px,18vw,270px);box-sizing:border-box}
+body.page-play #toolToggle{min-height:46px;font-size:16px;line-height:1.3;padding:9px 12px}
+body.page-play #toolMove{display:flex;align-items:center;justify-content:center;min-width:42px;min-height:46px;touch-action:none}
+body.page-play #toolPanel button[data-toggle]{font-size:13px;min-height:38px;padding:9px 10px}
+body.page-play.scene-live #toolDock{position:fixed!important;left:calc(50% - 125px);top:auto;bottom:8px;right:auto;transform:none;width:clamp(224px,18vw,270px);z-index:1500}
+body.page-play.scene-live #toolPanel{position:absolute!important;left:0!important;right:0!important;top:auto!important;bottom:calc(100% + 7px)!important;transform:none!important;width:100%!important;box-sizing:border-box;max-height:min(60dvh,390px)!important;overflow-y:auto;padding:12px}
+body.page-play.scene-live #toolPanel button[data-toggle]{width:100%;font-size:13px;line-height:1.35;white-space:normal}
+body.page-play.scene-live #toolMove{display:flex}
+@media(max-width:600px){body.page-play.scene-live #toolDock{left:calc(100vw - 234px);bottom:66px;width:224px}body.page-play.scene-live #toolPanel{max-height:60dvh!important}}
