@@ -2,4 +2,4 @@
 
 @media(pointer:coarse){#bar{min-height:46px}#bar button{min-height:44px;min-width:44px}#table{top:48px;height:calc(100dvh - 48px)}}
 
-#inviteLabel{flex-basis:100%;font-size:12px;color:#bfe7e3;margin-top:4px;text-align:left}#inviteUrl{flex-basis:100%;min-width:0;width:100%;font-size:12px;line-height:1.5;background:#09252d;color:#eaf8ee;border-color:#668d85}#inviteUrl:focus{outline:2px solid #f4db9b;outline-offset:1px}#copyStatus{flex-basis:100%;min-height:1.3em;margin:0;text-align:center;font-size:12px;color:#bfe7e3;overflow-wrap:anywhere}
+#inviteLabel{flex-basis:100%;font-size:12px;color:#bfe7e3;margin-top:4px;text-align:left}#inviteUrl{flex-basis:100%;min-width:0;width:100%;font-size:12px;line-height:1.5;background:#09252d;color:#eaf8ee;border-color:#668d85}#inviteUrl:focus{outline:2px solid #f4db9b;outline-offset:1px}#inviteHelp{flex-basis:100%;font-size:11px;line-height:1.6;color:#a9c3c5}#copyStatus{flex-basis:100%;min-height:1.3em;margin:0;text-align:center;font-size:12px;color:#bfe7e3;overflow-wrap:anywhere}

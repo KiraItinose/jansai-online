@@ -18,7 +18,7 @@ if(!/^[A-HJ-NP-Z2-9]{8}$/.test(code)){status('卓コードが正しくありま�
 let token;try{token=sessionStorage.getItem('jansai.cf.token.'+code);if(!token){token=secureRandom(32);sessionStorage.setItem('jansai.cf.token.'+code,token)}}catch{token=secureRandom(32)}
 let config=payload.config||{},ws=null,closed=false,joined=false,connected=false,started=false,frameReady=false;
 let roster=null,matchId=null,seat=-1,lastViews=null,lastGuestState=null,lastSeq=-1,retryCount=0,retryTimer=null,sendQueueViews=null;
-let wasConnected=false,canRetry=true;
+let wasConnected=false,canRetry=true,lastSentViewsSignature=null;
 const wsUrl=()=>`${location.protocol==='https:'?'wss':'ws'}://${location.host}/api/room/${code}`;
 const inviteUrl=()=>{const url=new URL('online.html',location.href);url.search='';url.hash='';url.searchParams.set('room',code);return url.href};
 function selectInviteUrl(){const field=$('#inviteUrl');field.focus({preventScroll:true});field.select();field.setSelectionRange?.(0,field.value.length)}
@@ -63,7 +63,7 @@ function connect(){
  let socket;try{socket=new WebSocket(wsUrl())}catch{scheduleRetry();return}
  ws=socket;joined=false;connected=false;
  const loginTimeout=setTimeout(()=>{if(ws===socket&&!joined)socket.close()},16000);
- socket.onopen=()=>{if(ws!==socket)return;send({type:'hello',mode:host?'host':'guest',name,token,config:host?config:undefined,resumeMatchId:host&&started?matchId:null})};
+ socket.onopen=()=>{if(ws!==socket)return;lastSentViewsSignature=null;send({type:'hello',mode:host?'host':'guest',name,token,config:host?config:undefined,resumeMatchId:host&&started?matchId:null})};
  socket.onmessage=e=>{
   if(ws!==socket)return;
   if(e.data==='pong')return;
@@ -118,7 +118,7 @@ window.addEventListener('message',e=>{
  }else if(host&&m.type==='views'&&Array.isArray(m.views)){
   lastViews=m.views;
   // Short burst coalescing: keeps most recent snapshots, including pending decisions.
-  if(!sendQueueViews)sendQueueViews=setTimeout(()=>{sendQueueViews=null;if(connected)send({type:'views',views:lastViews})},80);
+  if(!sendQueueViews)sendQueueViews=setTimeout(()=>{sendQueueViews=null;if(!connected)return;const signature=JSON.stringify(lastViews);if(signature!==lastSentViewsSignature&&send({type:'views',views:lastViews}))lastSentViewsSignature=signature},80);
  }else if(!host&&m.type==='action')send({type:'action',id:m.id,value:m.v});
  else if(!host&&m.type==='option')send({type:'option',key:m.key,value:m.value});
  else if(m.type==='leave')leave();

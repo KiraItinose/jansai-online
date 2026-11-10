@@ -14,7 +14,7 @@ body.scene-live #toolDock{left:12px!important;bottom:12px;width:178px}
 body.scene-live .site-header{position:relative;z-index:30}
 body.scene-live #tableHand{pointer-events:none}
 #toolPanel{max-height:calc(100dvh - 100px);overflow-y:auto}
-#rendererChoice,#cameraPreset{display:block;width:100%;margin:6px 0 10px;background:#102e2d;color:#f4dfb2;border:1px solid #a98b52;border-radius:7px;padding:7px}
+#rendererChoice,#cameraPreset,#sceneQuality{display:block;width:100%;margin:6px 0 10px;background:#102e2d;color:#f4dfb2;border:1px solid #a98b52;border-radius:7px;padding:7px}
 #rendererStatus{font-size:11px;line-height:1.5;color:#c9c4ac}
 #sceneHUD{position:absolute;inset:0;pointer-events:none;z-index:3}
 .scene-seat{position:absolute;display:flex;align-items:center;gap:9px;transform:translate(-50%,-50%);background:linear-gradient(135deg,#15313ae8,#030b12ed);border:1px solid #bca16a;border-radius:12px;padding:7px 11px 7px 7px;min-width:145px;color:#fff3d3;box-shadow:0 8px 14px #0009,inset 0 1px 1px #fff3;font-family:serif}

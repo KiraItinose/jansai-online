@@ -201,3 +201,20 @@ test('Invite URL remains visible and can be selected when clipboard write is den
  assert.match(js,/selectInviteUrl\(\)/);
  assert.match(css,/#inviteUrl\{/);
 });
+
+test('Duplicate room snapshots do not consume a second write or broadcast',async()=>{
+ const {ctx,room,host}=await setup();
+ const guest=await addGuest(room);
+ await msg(room,host,'start');
+ const views=Array.from({length:4},(_,i)=>view(i));
+ await msg(room,host,'views',{views});
+ const seq=(await ctx.storage.get('views')).seq;
+ const oldStates=guest.sent.filter(m=>m.type==='state').length;
+ await msg(room,host,'views',{views:structuredClone(views)});
+ assert.equal((await ctx.storage.get('views')).seq,seq);
+ assert.equal(guest.sent.filter(m=>m.type==='state').length,oldStates);
+ views[0].sc[0]=26000;
+ await msg(room,host,'views',{views});
+ assert.equal((await ctx.storage.get('views')).seq,seq+1);
+ assert.equal(guest.sent.filter(m=>m.type==='state').length,oldStates+1);
+});

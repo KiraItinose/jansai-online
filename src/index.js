@@ -160,6 +160,8 @@ export class JansaiRoom extends DurableObject {
     if(msg.type==='views') {
       if(auth.role!=='host'||!Array.isArray(msg.views)||msg.views.length!==4||!msg.views.every((v,i)=>safeView(v,i)))return;
       const previous=await this.ctx.storage.get('views');
+      // Duplicate UI and timer renders do not need an additional storage write or broadcast.
+      if(previous?.matchId===room.matchId && JSON.stringify(previous.views)===JSON.stringify(msg.views))return;
       const seq=(previous?.matchId===room.matchId?previous.seq:0)+1;
       // Persist the latest private view for each seat in one write; never distribute all four views.
       const saved={matchId:room.matchId,seq,views:msg.views};
