@@ -187,3 +187,17 @@ test('Published static routes and SW precache refer to existing assets',()=>{
   assert.ok(existsSync(new URL(name,base)),`Missing precache asset: ${name}`);
  }
 });
+
+test('Invite URL remains visible and can be selected when clipboard write is denied',()=>{
+ const base=new URL('../public/',import.meta.url);
+ const html=readFileSync(new URL('online.html',base),'utf8');
+ const js=readFileSync(new URL('online.js',base),'utf8');
+ const css=readFileSync(new URL('online.css',base),'utf8');
+ assert.match(html,/id="inviteUrl"[^>]*readonly/);
+ assert.match(html,/id="copyStatus"/);
+ assert.match(js,/url\.searchParams\.set\('room',code\)/);
+ assert.match(js,/document\.execCommand\?\.\('copy'\)/);
+ assert.match(js,/navigator\.clipboard\?\.writeText/);
+ assert.match(js,/selectInviteUrl\(\)/);
+ assert.match(css,/#inviteUrl\{/);
+});

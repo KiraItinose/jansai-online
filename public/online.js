@@ -20,9 +20,11 @@ let config=payload.config||{},ws=null,closed=false,joined=false,connected=false,
 let roster=null,matchId=null,seat=-1,lastViews=null,lastGuestState=null,lastSeq=-1,retryCount=0,retryTimer=null,sendQueueViews=null;
 let wasConnected=false,canRetry=true;
 const wsUrl=()=>`${location.protocol==='https:'?'wss':'ws'}://${location.host}/api/room/${code}`;
+const inviteUrl=()=>{const url=new URL('online.html',location.href);url.search='';url.hash='';url.searchParams.set('room',code);return url.href};
+function selectInviteUrl(){const field=$('#inviteUrl');field.focus({preventScroll:true});field.select();field.setSelectionRange?.(0,field.value.length)}
 function send(obj){if(ws?.readyState===WebSocket.OPEN){try{ws.send(JSON.stringify({v:P,...obj}));return true}catch{}}return false}
 function lobby(players){
- $('#codeRow').hidden=false;$('#code').textContent=code;
+ $('#codeRow').hidden=false;$('#code').textContent=code;$('#inviteUrl').value=inviteUrl();
  $('#players').replaceChildren();
  for(let i=0;i<4;i++){
   const m=players[i],el=document.createElement('div');el.className='player'+(m&&!m.connected?' offline':'');
@@ -129,9 +131,23 @@ function leave(){
 $('#start').onclick=()=>{if(host&&!started&&connected)send({type:'start'})};
 $('#back').onclick=leave;$('#exit').onclick=leave;
 $('#retry').onclick=()=>{if(ws?.readyState===WebSocket.OPEN)try{ws.close()}catch{};canRetry=true;retryCount=0;connect()};
+$('#inviteUrl').addEventListener('click',selectInviteUrl);
+$('#inviteUrl').addEventListener('focus',e=>e.currentTarget.select());
 $('#copy').onclick=async()=>{
- const url=new URL('online.html',location.href);url.search='';url.hash='';url.searchParams.set('room',code);
- try{await navigator.clipboard.writeText(url.href);$('#copy').textContent='コピーしました'}catch{prompt('この招待URLをコピーしてください',url.href)}
+ const field=$('#inviteUrl');field.value=inviteUrl();
+ // Synchronous fallback first: keeps the user gesture in browsers that block the modern API.
+ let copied=false;
+ try{selectInviteUrl();copied=document.execCommand?.('copy')===true}catch{}
+ if(!copied&&navigator.clipboard?.writeText){
+  try{await navigator.clipboard.writeText(field.value);copied=true}catch{}
+ }
+ if(copied){
+  $('#copy').textContent='コピーしました';
+  $('#copyStatus').textContent='招待URLをコピーしました。友人に送ってください。';
+ }else{
+  $('#copyStatus').textContent='自動コピーが許可されませんでした。選択中のURLをCtrl+Cでコピーしてください（スマホは長押し→コピー）。';
+  selectInviteUrl();
+ }
 };
 $('#fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();try{await screen.orientation.lock('landscape')}catch{}}catch{status('全画面非対応です。画面を横向きにしてください')}};
 window.addEventListener('beforeunload',e=>{if(started&&!closed){e.preventDefault();e.returnValue=''}});
