@@ -78,7 +78,14 @@ function setupMobileMatch(){
  const drawer=document.createElement('section');drawer.id='mobileGameDrawer';drawer.setAttribute('aria-label','対局中の設定');
  drawer.innerHTML='<div id="mobileGameHeading"><strong>対局中の設定</strong><button id="mobileGameClose" type="button" aria-label="設定を閉じる">閉じる ×</button></div><div id="mobileGameControls"></div>';
  document.body.append(button,drawer);
- const controls=$('#mobileGameControls');controls.append(dock);if(display)controls.append(display);
+ const controls=$('#mobileGameControls');
+ const zoomBox=document.createElement('label');zoomBox.className='mobile-zoom-control';
+ zoomBox.innerHTML='<span>卓と手牌の大きさ</span><select id="mobileTableZoom" aria-label="スマホの卓と手牌の大きさ"><option value="1.35">標準</option><option value="1.55">大きめ（推奨）</option><option value="1.75">最大</option></select>';
+ controls.append(zoomBox);
+ const zoomSelect=zoomBox.querySelector('select');
+ try{const stored=localStorage.getItem('jansai.mobile.tableZoom');if(['1.35','1.55','1.75'].includes(stored))zoomSelect.value=stored;else zoomSelect.value='1.55'}catch{zoomSelect.value='1.55'}
+ zoomSelect.addEventListener('change',()=>{try{localStorage.setItem('jansai.mobile.tableZoom',zoomSelect.value)}catch{}window.dispatchEvent(new Event('resize'))});
+ controls.append(dock);if(display)controls.append(display);
  const panel=$('#toolPanel'),toggle=$('#toolToggle'),close=$('#mobileGameClose');
  function shut(){document.body.classList.remove('mobile-sheet-open');button.setAttribute('aria-expanded','false');if(panel)panel.hidden=true;if(toggle)toggle.setAttribute('aria-expanded','false');if(display)display.open=false;}
  function open(){if(!document.body.classList.contains('scene-live')&&!window.matchMedia('(max-width:1000px)').matches)return;document.body.classList.add('mobile-sheet-open');button.setAttribute('aria-expanded','true');if(panel)panel.hidden=false;if(toggle)toggle.setAttribute('aria-expanded','true');}

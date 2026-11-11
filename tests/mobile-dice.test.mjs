@@ -9,7 +9,7 @@ test('new mobile and dice assets are valid JavaScript and wired to the game shel
  assert.doesNotThrow(()=>new Script(js));
  assert.match(shell,/nextScript\.src='jansai-ui-next\.js'/);
  assert.match(shell,/nextCss\.href='jansai-ui-next\.css'/);
- assert.match(sw,/cloudflare-ws9-mobile-dice/);
+ assert.match(sw,/cloudflare-ws10-mobile-stage/);
  assert.match(sw,/jansai-ui-next\.js/);
  assert.match(sw,/jansai-ui-next\.css/);
 });
@@ -29,8 +29,11 @@ test('mobile settings use real existing controls and preserve desktop layout',()
  assert.match(js,/controls\.append\(dock\)/);
  assert.match(js,/controls\.append\(display\)/);
  assert.match(js,/mobile-sheet-open/);
- assert.match(css,/#mobileGameDrawer\{display:contents\}/);
+ assert.ok(css.includes('#mobileGameDrawer,#mobileGameControls{display:contents}'));
  assert.match(css,/@media\(max-width:1000px\)/);
  assert.match(css,/body\.page-play\.scene-live #sceneHost/);
- assert.match(asset('webgl-table.js'),/compact&&preset\.value==='table'\?40/);
+ assert.match(js,/mobileTableZoom/);
+ assert.match(css,/.scene-seat\[data-seat="0"\]/);
+ assert.match(asset('webgl-table.js'),/mobileLandscape\?47:40/);
+ assert.match(asset('webgl-table.js'),/mobileTableZoom\(\)/);
 });
