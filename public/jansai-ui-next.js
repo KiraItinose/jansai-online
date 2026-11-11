@@ -64,7 +64,7 @@ function monitorDice(root){
  syncDice(root);
 }
 function setupDice(){
- monitorDice($('#chinchiroOverlay'));
+ // The match renderer calls ChinMotion.play() directly; avoid competing animation loops.
  monitorDice($('#chinchiroPreview'));
  if(!$('#chinchiroPreview')){
   const onNew=new MutationObserver(()=>{const p=$('#chinchiroPreview');if(p){monitorDice(p);onNew.disconnect();}});

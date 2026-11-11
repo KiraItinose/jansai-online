@@ -1,0 +1,31 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const source=readFileSync(new URL('../public/chinchiro-motion.js',import.meta.url),'utf8');
+test('match-owned dice rotate in real time and retain a flat result face',async()=>{
+ const queue=[];let rolling=true;
+ const window={};const document={head:{append(){}},getElementById:()=>null,createElement:()=>({className:'',setAttribute(){},innerHTML:''})};
+ vm.runInNewContext(source,{window,document,requestAnimationFrame:(fn)=>{queue.push(fn);return queue.length},cancelAnimationFrame(){},Promise,Math,parseFloat,WeakMap});
+ const nodes=[0,1,2].map(i=>{
+  const cube={value:'',style:{setProperty(key,value){if(key==='transform')cube.value=value;},removeProperty(){}},getAnimations:()=>[]};
+  const style={getPropertyValue(name){return name==='--endX'?String(i*90)+'deg':String(i*180)+'deg'},removeProperty(){}};
+  let flat=null;
+  return {cube,style,getAnimations:()=>[],classList:{remove(){},add(){}},querySelector(q){return q==='.die-cube'?cube:q==='.jan-match-face'?flat:null},append(face){flat=face},flat:()=>flat};
+ });
+ const root={isConnected:true,classList:{contains(name){return name==='chin-rolling'&&rolling}}};
+ const track={querySelectorAll:()=>nodes,closest:()=>root};
+ const finished=window.ChinMotion.play(track,true);
+ assert.equal(queue.length,1);
+ queue.shift()(0);
+ const first=nodes.map(n=>n.cube.value);
+ queue.shift()(1300);
+ const middle=nodes.map(n=>n.cube.value);
+ queue.shift()(3100);
+ await finished;
+ assert.ok(first.every((v,i)=>v!==middle[i]));
+ assert.ok(middle.every(v=>v.includes('rotateX(')));
+ assert.ok(nodes.every(n=>n.flat()?.className==='jan-match-face'));
+ assert.deepEqual(nodes.map(n=>n.flat().innerHTML.includes('jan-match-pip')),[true,true,true]);
+ rolling=false;
+});

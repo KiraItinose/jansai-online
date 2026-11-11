@@ -21,22 +21,12 @@ test('play UI hides only the redundant kuikae explanation',()=>{
  assert.match(s,/喰い替えなし/);
  assert.match(s,/section\.remove\(\)/);
 });
-test('three 3D dice spin, then finish on the game-provided end angles',async()=>{
- const w={matchMedia:()=>({matches:false})};
- vm.runInNewContext(file('chinchiro-motion.js'),{window:w});
- const dice=Array.from({length:3},(_,i)=>{
-  const animations=[];
-  const cube={getAnimations:()=>[],animate:(frames,opts)=>{
-   animations.push({frames,opts});return {finished:Promise.resolve()};
-  }};
-  const node={getAnimations:()=>[],querySelector:()=>cube,classList:{remove(){},add(){}},dataset:{},style:{getPropertyValue:k=>k==='--endX'?String(i*90)+'deg':String(i*180)+'deg'},animate:()=>({finished:Promise.resolve()})};
-  return {node,animations};
- });
- await w.ChinMotion.play({querySelectorAll:()=>dice.map(x=>x.node)},true);
- dice.forEach(({node,animations},i)=>{
-  assert.equal(node.dataset.motion,'3d-spin');
-  assert.equal(animations.length,1);
-  assert.equal(animations[0].frames.at(-1).transform,'rotateX('+i*90+'deg) rotateY('+i*180+'deg) rotateZ(0deg)');
-  assert.equal(animations[0].opts.duration,3000);
- });
+test('actual game Chinchiro.play drives three dice with no external observer',()=>{
+ const motion=file('chinchiro-motion.js');
+ const game=file('jansuno-play-v0.5.7.html');
+ assert.match(game,/window\.ChinMotion\?\.play\(\$\('#diceTrack'\),ch\.phase==='rolling'\)/);
+ assert.match(motion,/window\.ChinMotion=\{duration:DURATION,play\}/);
+ assert.match(motion,/requestAnimationFrame\(frame\)/);
+ assert.match(motion,/jan-match-face/);
+ assert.match(motion,/visibility:hidden!important/);
 });
