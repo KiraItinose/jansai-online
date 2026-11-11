@@ -9,7 +9,7 @@ test('new mobile and dice assets are valid JavaScript and wired to the game shel
  assert.doesNotThrow(()=>new Script(js));
  assert.match(shell,/nextScript\.src='jansai-ui-next\.js'/);
  assert.match(shell,/nextCss\.href='jansai-ui-next\.css'/);
- assert.match(sw,/cloudflare-ws12-mobile-focus/);
+ assert.match(sw,/cloudflare-ws13-five-dora-ui/);
  assert.match(sw,/jansai-ui-next\.js/);
  assert.match(sw,/jansai-ui-next\.css/);
 });
@@ -34,6 +34,6 @@ test('mobile settings use real existing controls and preserve desktop layout',()
  assert.match(css,/body\.page-play\.scene-live #sceneHost/);
  assert.match(js,/mobileTableZoom/);
  assert.match(css,/.scene-seat\[data-seat="0"\]/);
- assert.match(asset('webgl-table.js'),/mobileLandscape\?47:40/);
+ assert.match(asset('webgl-table.js'),/mobileLandscape\?57:40/);
  assert.match(asset('webgl-table.js'),/mobileTableZoom\(\)/);
 });

@@ -80,10 +80,14 @@ function setupMobileMatch(){
  document.body.append(button,drawer);
  const controls=$('#mobileGameControls');
  const zoomBox=document.createElement('label');zoomBox.className='mobile-zoom-control';
- zoomBox.innerHTML='<span>卓と手牌の大きさ</span><select id="mobileTableZoom" aria-label="スマホの卓と手牌の大きさ"><option value="1.35">標準</option><option value="1.55">大きめ（推奨）</option><option value="1.75">最大</option></select>';
+ zoomBox.innerHTML='<span>卓と手牌の大きさ</span><select id="mobileTableZoom" aria-label="スマホの卓と手牌の大きさ"><option value="1.16">卓を広く</option><option value="1.30">標準（推奨）</option><option value="1.44">手牌を大きく</option></select>';
  controls.append(zoomBox);
  const zoomSelect=zoomBox.querySelector('select');
- try{const stored=localStorage.getItem('jansai.mobile.tableZoom');if(['1.35','1.55','1.75'].includes(stored))zoomSelect.value=stored;else zoomSelect.value='1.55'}catch{zoomSelect.value='1.55'}
+ try{
+   const stored=localStorage.getItem('jansai.mobile.tableZoom');
+   const legacy={'1.35':'1.16','1.55':'1.30','1.75':'1.44'};
+   zoomSelect.value=['1.16','1.30','1.44'].includes(stored)?stored:(legacy[stored]||'1.30');
+ }catch{zoomSelect.value='1.30'}
  zoomSelect.addEventListener('change',()=>{try{localStorage.setItem('jansai.mobile.tableZoom',zoomSelect.value)}catch{}window.dispatchEvent(new Event('resize'))});
  controls.append(dock);if(display)controls.append(display);
  const panel=$('#toolPanel'),toggle=$('#toolToggle'),close=$('#mobileGameClose');
@@ -95,6 +99,41 @@ function setupMobileMatch(){
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('mobile-sheet-open'))shut();});
  window.matchMedia('(min-width:1001px)').addEventListener?.('change',event=>{if(event.matches)shut();});
 }
-function boot(){setupDice();setupMobileMatch();}
+function setupMobileTopAndQuick(){
+ if(!document.body.classList.contains('page-play')||document.querySelector('#mobileTopControls'))return;
+ const rule=$('#ruleSummary'),help=$('#rightPane .rules'),exit=$('#returnSetup');
+ if(!rule||!help||!exit)return;
+ const bar=document.createElement('nav');bar.id='mobileTopControls';bar.setAttribute('aria-label','対局中のメニュー');
+ bar.innerHTML='<button type="button" id="mobileRuleButton" aria-expanded="false" aria-controls="ruleSummary">ルール</button><button type="button" id="mobileHelpButton" aria-expanded="false" aria-controls="mobileHelpContent" aria-label="操作方法と特殊ルール">？</button><button type="button" id="mobileExitButton" aria-label="対局終了・戻る">×</button>';
+ document.body.append(bar);
+ help.id='mobileHelpContent';
+ const ruleBtn=bar.querySelector('#mobileRuleButton'),helpBtn=bar.querySelector('#mobileHelpButton');
+ const sync=()=>{ruleBtn.setAttribute('aria-expanded',String(rule.open));helpBtn.setAttribute('aria-expanded',String(help.open));};
+ function closeMenu(){rule.open=false;help.open=false;sync();}
+ ruleBtn.addEventListener('click',()=>{const desired=!rule.open;closeMenu();rule.open=desired;sync();});
+ helpBtn.addEventListener('click',()=>{const desired=!help.open;closeMenu();help.open=desired;sync();});
+ bar.querySelector('#mobileExitButton').addEventListener('click',()=>exit.click());
+ rule.addEventListener('toggle',sync);help.addEventListener('toggle',sync);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+ const landscape=window.matchMedia('(max-width:1000px) and (orientation:landscape)');
+ const ensureClosed=()=>{if(landscape.matches)closeMenu()};
+ ensureClosed();landscape.addEventListener?.('change',ensureClosed);
+ const quick=document.createElement('div');quick.id='mobileQuickControls';quick.setAttribute('role','group');quick.setAttribute('aria-label','対局中の切替');
+ for(const key of ['autoWin','calls','waits']){
+   const source=document.querySelector('#toolPanel [data-toggle="'+key+'"]');
+   if(!source)continue;
+   const b=document.createElement('button');b.type='button';b.className='mobile-quick-toggle';b.dataset.toggle=key;
+   const refresh=()=>{
+     b.textContent=source.textContent.trim().replace('待ち牌表示','待ち牌');
+     const off=/OFF|無効/.test(source.textContent);
+     b.dataset.state=off?'off':'on';b.setAttribute('aria-pressed',String(!off));
+   };
+   b.addEventListener('click',()=>{source.click();queueMicrotask(refresh)});
+   new MutationObserver(refresh).observe(source,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-pressed','class']});
+   refresh();quick.append(b);
+ }
+ document.body.append(quick);
+}
+function boot(){setupDice();setupMobileMatch();setupMobileTopAndQuick();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

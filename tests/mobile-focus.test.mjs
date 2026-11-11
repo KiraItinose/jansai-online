@@ -18,7 +18,7 @@ test('mobile-only portrait-focused layout leaves desktop untouched',()=>{
 });
 test('mobile update keeps Cloudflare PWA and real match dice mechanism',()=>{
  const sw=file('sw.js'),motion=file('chinchiro-motion.js');
- assert.match(sw,/cloudflare-ws12-mobile-focus/);
+ assert.match(sw,/cloudflare-ws13-five-dora-ui/);
  assert.match(sw,/jansai-ui-next\.css/);
  assert.match(motion,/window\.ChinMotion=\{duration:DURATION,play\}/);
 });

@@ -27,9 +27,11 @@ test('mobile magnification has bounded presets and recommended default',()=>{
  assert.ok(match);
  const context={localStorage:{getItem:()=>null}};
  const fn=vm.runInNewContext(match[0]+'\nmobileTableZoom',context);
- assert.equal(fn(),1.55);
+ assert.equal(fn(),1.30);
+ context.localStorage.getItem=()=> '1.44';
+ assert.equal(fn(),1.44);
  context.localStorage.getItem=()=> '1.75';
- assert.equal(fn(),1.75);
+ assert.equal(fn(),1.44);
  context.localStorage.getItem=()=> '999';
- assert.equal(fn(),1.55);
+ assert.equal(fn(),1.30);
 });

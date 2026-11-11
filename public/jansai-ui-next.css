@@ -320,3 +320,217 @@
   body.page-play.scene-live #sceneHUD .scene-seat[data-seat="3"]{left:9%!important}
   body.page-play.scene-live #sceneWait{left:calc(27% + 40px)!important;max-width:29vw!important}
 }
+
+/* Mobile landscape v4: readable five-slot dora and non-blocking controls.
+   Layout proportions are adapted; Mahjong art/character assets remain Jansai originals. */
+#mobileTopControls,#mobileQuickControls{display:none}
+@media (max-width:1000px) and (orientation:landscape) {
+ body.page-play.scene-live #sceneHost{top:0!important;bottom:0!important}
+ body.page-play.scene-live .site-header{display:none!important}
+
+ /* Five compact indicators: none of the unrevealed faces are leaked. */
+ body.page-play.scene-live #sceneDora{
+   display:flex!important;flex-direction:column!important;
+   box-sizing:border-box!important;width:clamp(176px,22.5vw,216px)!important;
+   min-width:0!important;max-width:none!important;
+   top:max(6px,env(safe-area-inset-top))!important;
+   left:max(6px,env(safe-area-inset-left))!important;
+   padding:5px 7px!important;gap:4px!important;
+   background:#071b24ea!important;border-radius:10px!important;
+   z-index:90!important;
+ }
+ body.page-play.scene-live #sceneDora .scene-dora-row{
+   display:grid!important;grid-template-columns:26px repeat(5,minmax(0,1fr))!important;
+   align-items:center!important;gap:3px!important;min-width:0!important;
+   width:100%!important;white-space:nowrap!important;
+ }
+ body.page-play.scene-live #sceneDora .scene-dora-label{
+   display:block!important;font-size:10px!important;font-weight:700!important;
+ }
+ body.page-play.scene-live #sceneDora .scene-dora-row img,
+ body.page-play.scene-live #sceneDora .scene-dora-empty{
+   box-sizing:border-box!important;display:block!important;
+   width:100%!important;min-width:0!important;height:auto!important;
+   aspect-ratio:21/28!important;max-height:36px!important;
+   object-fit:contain!important;margin:0!important;border-radius:3px!important;
+ }
+ body.page-play.scene-live #sceneDora .scene-dora-empty{
+   background:linear-gradient(135deg,#25333b,#101b24)!important;
+   border:1px solid #907c61!important;box-shadow:inset 0 0 0 2px #132630!important;
+ }
+ body.page-play.scene-live #sceneDora .scene-dora-meta{
+   display:grid!important;grid-template-columns:1fr 1fr!important;
+   gap:5px!important;font-size:9px!important;padding-top:4px!important;
+ }
+ body.page-play.scene-live #sceneDora .scene-dora-meta>div{
+   display:flex!important;flex-direction:row!important;align-items:center!important;
+   justify-content:center!important;gap:5px!important;
+ }
+ body.page-play.scene-live #sceneDora .score-stick{
+   width:30px!important;height:6px!important;max-width:30px!important;
+ }
+
+ /* The three access buttons remain fixed in the upper-right corner. */
+ body.page-play.scene-live #mobileTopControls{
+   display:flex!important;position:fixed!important;
+   top:max(5px,env(safe-area-inset-top))!important;
+   right:max(8px,env(safe-area-inset-right))!important;
+   align-items:center!important;gap:5px!important;
+   z-index:2100!important;pointer-events:auto!important;
+ }
+ body.page-play.scene-live #mobileTopControls button{
+   font:700 12px/1.1 system-ui,sans-serif!important;
+   color:#ffe6ad!important;background:#09222dee!important;
+   border:1px solid #bba06a!important;border-radius:9px!important;
+   min-width:40px!important;min-height:38px!important;
+   padding:6px 9px!important;box-shadow:0 3px 9px #0009!important;
+   cursor:pointer!important;
+ }
+ body.page-play.scene-live #mobileTopControls #mobileHelpButton,
+ body.page-play.scene-live #mobileTopControls #mobileExitButton{
+   font-size:21px!important;min-width:40px!important;width:40px!important;
+ }
+ body.page-play.scene-live #mobileTopControls button[aria-expanded="true"]{
+   background:#27505a!important;border-color:#ffe2a4!important;
+ }
+ /* Keep source details accessible through a small right-edge popover. */
+ body.page-play.scene-live #ruleSummary:not([open]),
+ body.page-play.scene-live #rightPane .rules:not([open]){display:none!important}
+ body.page-play.scene-live #ruleSummary[open],
+ body.page-play.scene-live #rightPane .rules[open]{
+   display:block!important;position:fixed!important;
+   left:auto!important;right:max(8px,env(safe-area-inset-right))!important;
+   top:max(48px,calc(env(safe-area-inset-top) + 48px))!important;
+   bottom:auto!important;
+   box-sizing:border-box!important;
+   width:min(250px,48vw)!important;max-width:250px!important;
+   min-width:0!important;min-height:0!important;
+   height:auto!important;max-height:min(58dvh,270px)!important;
+   overflow-y:auto!important;overflow-x:hidden!important;
+   border:1px solid #c2a571!important;border-radius:10px!important;
+   padding:9px 10px!important;margin:0!important;
+   background:#061a26f3!important;box-shadow:0 8px 18px #000b!important;
+   z-index:2050!important;pointer-events:auto!important;
+ }
+ body.page-play.scene-live #ruleSummary[open] > summary,
+ body.page-play.scene-live #rightPane .rules[open] > summary{
+   font-size:12px!important;min-height:27px!important;
+ }
+ body.page-play.scene-live #ruleSummary[open] #ruleText,
+ body.page-play.scene-live #rightPane .rules[open] .help-scroll{
+   max-height:none!important;width:100%!important;overflow:visible!important;
+   font-size:11px!important;
+ }
+ body.page-play.scene-live #rightPane{
+   pointer-events:none!important;
+   top:0!important;right:0!important;width:0!important;height:0!important;
+   min-width:0!important;overflow:visible!important;
+ }
+ body.page-play.scene-live #rightPane .right-actions,
+ body.page-play.scene-live #jrOpenHistory{display:none!important}
+ body.page-play.scene-live #rightPane .rules[open]{pointer-events:auto!important}
+
+ /* The original three switches are surfaced as small live proxies with one state source. */
+ body.page-play.scene-live #mobileQuickControls{
+   display:flex!important;flex-direction:column!important;gap:4px!important;
+   position:fixed!important;
+   left:max(6px,env(safe-area-inset-left))!important;
+   bottom:max(63px,calc(env(safe-area-inset-bottom) + 63px))!important;
+   z-index:1850!important;
+   width:94px!important;pointer-events:auto!important;
+ }
+ body.page-play.scene-live #mobileQuickControls .mobile-quick-toggle{
+   box-sizing:border-box!important;min-height:31px!important;
+   width:94px!important;padding:4px 5px!important;
+   font-size:11px!important;font-weight:700!important;line-height:1.25!important;
+   border:1px solid #c6a96e!important;border-radius:8px!important;
+   background:#0d2631ef!important;color:#ffecbe!important;
+   box-shadow:0 2px 7px #0008!important;white-space:nowrap!important;
+ }
+ body.page-play.scene-live #mobileQuickControls .mobile-quick-toggle[data-state="off"]{
+   color:#c8d0d1!important;border-color:#697e80!important;background:#14232bea!important;
+ }
+
+ /* Small display-only settings palette; never darken or block the table. */
+ body.page-play.scene-live #mobileGameToggle{
+   left:max(6px,env(safe-area-inset-left))!important;right:auto!important;
+   bottom:max(169px,calc(env(safe-area-inset-bottom) + 169px))!important;
+   width:48px!important;min-width:48px!important;height:42px!important;
+   min-height:42px!important;padding:4px!important;
+   font-size:0!important;border-radius:9px!important;
+   z-index:1850!important;
+ }
+ body.page-play.scene-live #mobileGameToggle::before{content:'⚙';font-size:24px!important}
+ body.page-play.mobile-sheet-open #mobileGameDrawer{
+   position:fixed!important;display:flex!important;
+   top:auto!important;bottom:max(75px,calc(env(safe-area-inset-bottom) + 75px))!important;
+   left:max(107px,calc(env(safe-area-inset-left) + 107px))!important;
+   right:auto!important;inset-inline-end:auto!important;
+   width:min(235px,42vw)!important;max-width:235px!important;
+   height:auto!important;max-height:min(59dvh,260px)!important;
+   box-sizing:border-box!important;overflow:hidden!important;
+   flex-direction:column!important;align-items:stretch!important;
+   background:#061925f2!important;border:1px solid #b39a70!important;
+   border-radius:11px!important;padding:0!important;
+   box-shadow:0 7px 22px #000a!important;
+   z-index:1950!important;pointer-events:auto!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameHeading{
+   display:flex!important;width:100%!important;box-sizing:border-box!important;
+   padding:5px 8px!important;font-size:12px!important;
+   border:0!important;border-radius:10px 10px 0 0!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameControls{
+   display:flex!important;width:100%!important;box-sizing:border-box!important;
+   max-height:215px!important;overflow-y:auto!important;
+   padding:7px!important;gap:6px!important;border:0!important;
+   background:transparent!important;border-radius:0!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameDrawer .tool-dock-head,
+ body.page-play.mobile-sheet-open #mobileGameDrawer .tool-title,
+ body.page-play.mobile-sheet-open #mobileGameDrawer #toolPanel button[data-toggle]{
+   display:none!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameDrawer .mobile-zoom-control{
+   display:flex!important;flex-direction:column!important;gap:3px!important;
+   font-size:11px!important;color:#ffe8b6!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameDrawer #mobileTableZoom{
+   font-size:12px!important;min-height:34px!important;width:100%!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameDrawer #toolDock,
+ body.page-play.mobile-sheet-open #mobileGameDrawer #toolPanel,
+ body.page-play.mobile-sheet-open #mobileGameDrawer #displayDock{
+   width:100%!important;margin:0!important;max-height:none!important;
+ }
+
+ /* Reserved edges: display information without blocking the discard or draw area. */
+ body.page-play.scene-live #sceneHUD .scene-seat[data-seat="2"]{
+   left:50%!important;top:14%!important;
+ }
+ body.page-play.scene-live #sceneHUD .scene-seat[data-seat="3"]{
+   left:8%!important;top:39%!important;
+ }
+ body.page-play.scene-live #sceneHUD .scene-seat[data-seat="1"]{
+   left:92%!important;top:39%!important;
+ }
+ body.page-play.scene-live #sceneHUD .scene-seat[data-seat="0"]{
+   left:28%!important;top:73%!important;
+ }
+ body.page-play.scene-live #actionArea:not(.end-actions){
+   bottom:84px!important;max-width:48vw!important;
+   right:max(8px,env(safe-area-inset-right))!important;
+ }
+ body.page-play.scene-live #sceneTimer{
+   top:auto!important;left:auto!important;
+   right:12px!important;bottom:24px!important;
+   font-size:11px!important;
+ }
+}
+@media (max-width:700px) and (orientation:landscape) {
+ body.page-play.scene-live #sceneDora{width:178px!important}
+ body.page-play.scene-live #mobileTopControls button{min-width:36px!important;padding:5px 7px!important}
+ body.page-play.scene-live #mobileTopControls #mobileHelpButton,
+ body.page-play.scene-live #mobileTopControls #mobileExitButton{width:36px!important;min-width:36px!important}
+ body.page-play.scene-live #sceneHUD .scene-seat[data-seat="2"]{left:50%!important;top:15%!important}
+}
