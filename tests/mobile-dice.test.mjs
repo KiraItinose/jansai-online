@@ -9,7 +9,7 @@ test('new mobile and dice assets are valid JavaScript and wired to the game shel
  assert.doesNotThrow(()=>new Script(js));
  assert.match(shell,/nextScript\.src='jansai-ui-next\.js'/);
  assert.match(shell,/nextCss\.href='jansai-ui-next\.css'/);
- assert.match(sw,/cloudflare-ws11-live-chinchiro/);
+ assert.match(sw,/cloudflare-ws12-mobile-focus/);
  assert.match(sw,/jansai-ui-next\.js/);
  assert.match(sw,/jansai-ui-next\.css/);
 });

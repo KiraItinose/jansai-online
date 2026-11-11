@@ -156,3 +156,167 @@
  body.page-play.scene-live .scene-seat[data-seat="3"]{left:50px!important}
  body.page-play.scene-live #actionArea:not(.end-actions){right:58px!important;max-width:60vw!important}
 }
+
+
+/* v0.5.7 mobile landscape v3 — portrait-first heads-up display.
+   Uses the current Jansai character art only; no third-party assets. */
+@media (max-width:1000px) and (orientation:landscape) {
+  /* Keep the game board immersive rather than shrinking it to fit side panels. */
+  body.page-play.scene-live #sceneHost{
+    top:0!important;
+    bottom:0!important;
+    left:env(safe-area-inset-left,0px)!important;
+    right:env(safe-area-inset-right,0px)!important;
+  }
+  body.page-play.scene-live .site-header{display:none!important}
+  body.page-play.scene-live #ruleSummary{
+    left:max(129px,env(safe-area-inset-left))!important;
+    top:5px!important;
+    width:72px!important;
+    padding:4px 6px!important;
+    border-radius:8px!important;
+    background:#06151ccc!important;
+    z-index:160!important;
+  }
+  body.page-play.scene-live #ruleSummary>summary{font-size:10px!important}
+  body.page-play.scene-live #rightPane{
+    top:4px!important;
+    right:max(6px,env(safe-area-inset-right))!important;
+  }
+  body.page-play.scene-live #sceneDora{
+    left:max(7px,env(safe-area-inset-left))!important;
+    top:7px!important;
+    width:112px!important;
+    min-width:112px!important;
+    max-width:112px!important;
+    padding:5px 6px!important;
+    background:#081925e8!important;
+    box-shadow:0 2px 7px #0009!important;
+  }
+  /* Reference-like spatial hierarchy: portraits at the rim, not four large cards. */
+  body.page-play.scene-live #sceneHUD .scene-seat{
+    width:72px!important;
+    max-width:72px!important;
+    min-width:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:2px!important;
+    padding:0!important;
+    border:none!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    transform:translate(-50%,-50%)!important;
+    pointer-events:none!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat.active{
+    border:none!important;
+    box-shadow:none!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-avatar{
+    display:block!important;
+    flex:0 0 42px!important;
+    width:42px!important;
+    height:42px!important;
+    border:2px solid #d9bc7a!important;
+    border-radius:8px!important;
+    background-size:cover!important;
+    background-position:center!important;
+    box-shadow:0 3px 8px #000b!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat.active .scene-avatar{
+    border-color:#ffeab0!important;
+    box-shadow:0 0 12px #ffdc7fbb,0 3px 8px #000b!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat > div{
+    box-sizing:border-box;
+    min-width:0!important;
+    width:100%!important;
+    text-align:center!important;
+    padding:2px 3px 3px!important;
+    border-radius:4px!important;
+    background:#06141dde!important;
+    box-shadow:0 1px 3px #0008!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat strong{
+    max-width:100%!important;
+    font-family:inherit!important;
+    color:#f9e8bd!important;
+    font-size:9px!important;
+    line-height:1.15!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    text-align:center!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-score{
+    max-width:100%!important;
+    display:flex!important;
+    justify-content:center!important;
+    align-items:center!important;
+    font-size:10px!important;
+    line-height:1.25!important;
+    color:#f5e8cc!important;
+    white-space:nowrap!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-wind{
+    display:none!important;
+  }
+  /* Relative to screen dimensions: 0=own, 1=right, 2=opposite, 3=left. */
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="0"]{
+    left:clamp(142px,28%,290px)!important;top:71%!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="1"]{
+    left:91%!important;top:35%!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="2"]{
+    left:69%!important;top:14%!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="3"]{
+    left:8%!important;top:36%!important;
+  }
+  /* Compact optional controls without placing a large button over the hand. */
+  body.page-play.scene-live #mobileGameToggle{
+    left:max(7px,env(safe-area-inset-left))!important;
+    right:auto!important;
+    bottom:24%!important;
+    min-width:44px!important;
+    width:44px!important;
+    min-height:48px!important;
+    padding:4px!important;
+    font-size:0!important;
+    border-radius:10px!important;
+    z-index:1500!important;
+  }
+  body.page-play.scene-live #mobileGameToggle::before{
+    content:'⚙';font-size:23px!important;line-height:1!important;
+  }
+  body.page-play.scene-live #sceneWait{
+    left:clamp(213px,calc(28% + 78px),368px)!important;
+    top:71%!important;
+    transform:translate(0,-50%)!important;
+    width:max-content!important;
+    max-width:min(175px,34vw)!important;
+    font-size:10px!important;
+  }
+  body.page-play.scene-live #actionArea:not(.end-actions){
+    right:max(10px,env(safe-area-inset-right))!important;
+    bottom:72px!important;
+    max-width:46vw!important;
+  }
+}
+@media (max-width:700px) and (orientation:landscape) {
+  body.page-play.scene-live #sceneHUD .scene-seat{
+    width:62px!important;max-width:62px!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-avatar{
+    width:36px!important;height:36px!important;flex-basis:36px!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="0"]{left:27%!important;top:69%!important}
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="1"]{left:90%!important}
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="2"]{left:68%!important}
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="3"]{left:9%!important}
+  body.page-play.scene-live #sceneWait{left:calc(27% + 40px)!important;max-width:29vw!important}
+}
