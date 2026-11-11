@@ -31,3 +31,37 @@
 .page-room .join-controls input#cd{flex:1 1 auto;width:100%;min-width:0;text-transform:uppercase;background:#09242a;color:#f9e6bb;font-size:15px;padding:10px 12px}
 .page-room .join-controls #jn{flex:0 0 96px;min-height:44px;font-size:14px}
 @media(max-width:650px){.page-room .lobby-actions{padding:12px 18px 20px}.page-room .join-controls #jn{flex-basis:78px}}
+
+/* Test the exact dice display without starting or affecting a real game. */
+#previewChinBtn{min-height:42px;padding:9px 12px;cursor:pointer;border:1px solid #b28c56;border-radius:9px;background:#12343c;color:#f4e2b6}
+#chinchiroPreview{width:min(560px,96vw);max-height:min(94dvh,680px);overflow:auto;border:2px solid #b28c56;border-radius:18px;padding:20px;background:#101e26;color:#f5e2b9;box-shadow:0 18px 80px #000d;text-align:center}
+#chinchiroPreview::backdrop{background:#000b}
+#chinchiroPreview .chin-bowl{margin:18px auto;width:min(410px,82vw)}
+#chinchiroPreview .chin-result{font-size:16px}
+#chinchiroPreview .preview-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#chinchiroPreview .preview-actions button{min-height:42px;padding:9px 20px}
+
+/* Dice spin is driven by the actual game phase, not the optional JS animation API.
+   Final faces are always taken from each die's --endX/--endY values. */
+@keyframes jansaiSpinDice {
+  0%{transform:translate3d(0,-18px,15px) rotateX(calc(var(--endX) + 1080deg)) rotateY(calc(var(--endY) - 900deg)) rotateZ(540deg)}
+  20%{transform:translate3d(0,4px,12px) rotateX(calc(var(--endX) + 825deg)) rotateY(calc(var(--endY) - 680deg)) rotateZ(405deg)}
+  42%{transform:translate3d(0,-13px,10px) rotateX(calc(var(--endX) + 590deg)) rotateY(calc(var(--endY) - 455deg)) rotateZ(280deg)}
+  64%{transform:translate3d(0,2px,5px) rotateX(calc(var(--endX) + 345deg)) rotateY(calc(var(--endY) - 220deg)) rotateZ(142deg)}
+  82%{transform:translate3d(0,-6px,3px) rotateX(calc(var(--endX) + 104deg)) rotateY(calc(var(--endY) - 66deg)) rotateZ(25deg)}
+  100%{transform:rotateX(var(--endX)) rotateY(var(--endY)) rotateZ(0deg)}
+}
+#chinchiroPreview.chin-rolling .die-position .die-cube{
+  animation:jansaiSpinDice 3.1s cubic-bezier(.21,.52,.18,1) both!important;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+#chinchiroPreview:not(.chin-rolling) .die-position .die-cube{
+  animation:none!important;
+  transform:rotateX(var(--endX)) rotateY(var(--endY))!important;
+}
+#chinchiroPreview.chin-rolling .die-position:nth-child(2) .die-cube{animation-delay:75ms!important}
+#chinchiroPreview.chin-rolling .die-position:nth-child(3) .die-cube{animation-delay:145ms!important}
+@media(prefers-reduced-motion:reduce){
+    #chinchiroPreview.chin-rolling .die-position .die-cube{animation:none!important}
+}

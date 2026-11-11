@@ -24,3 +24,34 @@ body.scene-live #sceneWait{width:max-content;max-width:min(340px,calc(100% - 16p
 #chinchiroOverlay .die-position.rolling:nth-child(2) .die-cube{animation-duration:3.05s}
 #chinchiroOverlay .die-position.rolling:nth-child(3) .die-cube{animation-duration:2.95s}
 @media(prefers-reduced-motion:reduce){#chinchiroOverlay .die-position.rolling .die-cube{animation:none}}
+
+
+/* Dice spin is driven by the actual game phase, not the optional JS animation API.
+   Final faces are always taken from each die's --endX/--endY values. */
+@keyframes jansaiSpinDice {
+  0%{transform:translate3d(0,-18px,15px) rotateX(calc(var(--endX) + 1080deg)) rotateY(calc(var(--endY) - 900deg)) rotateZ(540deg)}
+  20%{transform:translate3d(0,4px,12px) rotateX(calc(var(--endX) + 825deg)) rotateY(calc(var(--endY) - 680deg)) rotateZ(405deg)}
+  42%{transform:translate3d(0,-13px,10px) rotateX(calc(var(--endX) + 590deg)) rotateY(calc(var(--endY) - 455deg)) rotateZ(280deg)}
+  64%{transform:translate3d(0,2px,5px) rotateX(calc(var(--endX) + 345deg)) rotateY(calc(var(--endY) - 220deg)) rotateZ(142deg)}
+  82%{transform:translate3d(0,-6px,3px) rotateX(calc(var(--endX) + 104deg)) rotateY(calc(var(--endY) - 66deg)) rotateZ(25deg)}
+  100%{transform:rotateX(var(--endX)) rotateY(var(--endY)) rotateZ(0deg)}
+}
+#chinchiroOverlay.chin-rolling .die-position .die-cube,
+#chinchiroPreview.chin-rolling .die-position .die-cube{
+  animation:jansaiSpinDice 3.1s cubic-bezier(.21,.52,.18,1) both!important;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+#chinchiroOverlay:not(.chin-rolling) .die-position .die-cube,
+#chinchiroPreview:not(.chin-rolling) .die-position .die-cube{
+  animation:none!important;
+  transform:rotateX(var(--endX)) rotateY(var(--endY))!important;
+}
+#chinchiroOverlay.chin-rolling .die-position:nth-child(2) .die-cube,
+#chinchiroPreview.chin-rolling .die-position:nth-child(2) .die-cube{animation-delay:75ms!important}
+#chinchiroOverlay.chin-rolling .die-position:nth-child(3) .die-cube,
+#chinchiroPreview.chin-rolling .die-position:nth-child(3) .die-cube{animation-delay:145ms!important}
+@media(prefers-reduced-motion:reduce){
+  #chinchiroOverlay.chin-rolling .die-position .die-cube,
+  #chinchiroPreview.chin-rolling .die-position .die-cube{animation:none!important}
+}
