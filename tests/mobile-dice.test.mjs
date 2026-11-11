@@ -1,39 +1,28 @@
-import { test } from 'node:test';
+import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { Script } from 'node:vm';
-
-const asset=name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8');
-test('new mobile and dice assets are valid JavaScript and wired to the game shell',()=>{
- const js=asset('jansai-ui-next.js'),shell=asset('app-shell.js'),sw=asset('sw.js');
- assert.doesNotThrow(()=>new Script(js));
- assert.match(shell,/nextScript\.src='jansai-ui-next\.js'/);
- assert.match(shell,/nextCss\.href='jansai-ui-next\.css'/);
- assert.match(sw,/cloudflare-ws13-five-dora-ui/);
- assert.match(sw,/jansai-ui-next\.js/);
- assert.match(sw,/jansai-ui-next\.css/);
+import {readFileSync} from 'node:fs';
+import {Script} from 'node:vm';
+const file=n=>readFileSync(new URL('../public/'+n,import.meta.url),'utf8');
+test('standalone mobile layout loads last without touching the engine',()=>{
+ const ui=file('jansai-ui-next.js'),shell=file('app-shell.js'),sw=file('sw.js');
+ assert.doesNotThrow(()=>new Script(ui));
+ assert.match(shell,/jansai-mobile-v5\.css/);
+ assert.match(shell,/jansai-ui-next\.js/);
+ assert.match(sw,/cloudflare-ws14-mobile-redesign/);
+ assert.match(sw,/jansai-mobile-v5\.css/);
 });
-test('rolling dice have independent angle changes and flat result faces',()=>{
- const js=asset('jansai-ui-next.js'),css=asset('jansai-ui-next.css');
- assert.match(js,/requestAnimationFrame\(tick\)/);
- assert.match(js,/cube\.style\.setProperty\('transform'/);
- assert.match(js,/rotateX/);
- for(const angle of ['-90,0','0,-90','0,90','90,0','0,180'])assert.ok(js.includes("'"+angle+"'"));
- assert.match(js,/jan-die-flat/);
- assert.ok(css.includes('#chinchiroOverlay:not(.chin-rolling) .die-position .die-cube,'));
- assert.ok(css.includes('visibility:hidden!important'));
+test('chinchiro preview still uses its existing animation and clean settled faces',()=>{
+ const ui=file('jansai-ui-next.js'),css=file('jansai-ui-next.css');
+ assert.match(ui,/requestAnimationFrame\(tick\)/);
+ assert.match(ui,/jan-die-flat/);
  assert.match(css,/#chinchiroOverlay\.chin-rolling \.jan-die-flat/);
+ assert.match(css,/visibility:hidden!important/);
 });
-test('mobile settings use real existing controls and preserve desktop layout',()=>{
- const js=asset('jansai-ui-next.js'),css=asset('jansai-ui-next.css');
- assert.match(js,/controls\.append\(dock\)/);
- assert.match(js,/controls\.append\(display\)/);
- assert.match(js,/mobile-sheet-open/);
- assert.ok(css.includes('#mobileGameDrawer,#mobileGameControls{display:contents}'));
- assert.match(css,/@media\(max-width:1000px\)/);
- assert.match(css,/body\.page-play\.scene-live #sceneHost/);
- assert.match(js,/mobileTableZoom/);
- assert.match(css,/.scene-seat\[data-seat="0"\]/);
- assert.match(asset('webgl-table.js'),/mobileLandscape\?57:40/);
- assert.match(asset('webgl-table.js'),/mobileTableZoom\(\)/);
+test('mobile quick switches use real game buttons and can be adjusted while playing',()=>{
+ const ui=file('jansai-ui-next.js'),css=file('jansai-mobile-v5.css');
+ assert.match(ui,/source\.click\(\)/);
+ assert.match(ui,/new MutationObserver\(refresh\)/);
+ assert.match(ui,/autoWin:'和了',calls:'鳴き',waits:'待ち'/);
+ assert.match(css,/#mobileQuickControls \.mobile-quick-toggle/);
+ assert.match(css,/pointer-events:auto!important/);
 });

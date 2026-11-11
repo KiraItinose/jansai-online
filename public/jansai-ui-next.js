@@ -80,16 +80,33 @@ function setupMobileMatch(){
  document.body.append(button,drawer);
  const controls=$('#mobileGameControls');
  const zoomBox=document.createElement('label');zoomBox.className='mobile-zoom-control';
- zoomBox.innerHTML='<span>卓と手牌の大きさ</span><select id="mobileTableZoom" aria-label="スマホの卓と手牌の大きさ"><option value="1.16">卓を広く</option><option value="1.30">標準（推奨）</option><option value="1.44">手牌を大きく</option></select>';
+ zoomBox.innerHTML='<span>卓の見える範囲</span><select id="mobileTableZoom" aria-label="スマホの卓の見える範囲"><option value="1.04">卓全体</option><option value="1.12">標準（推奨）</option><option value="1.20">近くから見る</option></select>';
  controls.append(zoomBox);
  const zoomSelect=zoomBox.querySelector('select');
  try{
    const stored=localStorage.getItem('jansai.mobile.tableZoom');
-   const legacy={'1.35':'1.16','1.55':'1.30','1.75':'1.44'};
-   zoomSelect.value=['1.16','1.30','1.44'].includes(stored)?stored:(legacy[stored]||'1.30');
- }catch{zoomSelect.value='1.30'}
+   const legacy={'1.16':'1.04','1.30':'1.12','1.44':'1.20','1.35':'1.04','1.55':'1.12','1.75':'1.20'};
+   zoomSelect.value=['1.04','1.12','1.20'].includes(stored)?stored:(legacy[stored]||'1.12');
+ }catch{zoomSelect.value='1.12'}
  zoomSelect.addEventListener('change',()=>{try{localStorage.setItem('jansai.mobile.tableZoom',zoomSelect.value)}catch{}window.dispatchEvent(new Event('resize'))});
  controls.append(dock);if(display)controls.append(display);
+ // Fullscreen is an opt-in user gesture; never hide system UI automatically.
+ if(typeof document.documentElement.requestFullscreen==='function'){
+   const fullscreen=document.createElement('button');fullscreen.type='button';fullscreen.id='mobileFullscreenToggle';
+   const updateFullscreen=()=>{fullscreen.textContent=document.fullscreenElement?'全画面を終了':'全画面で遊ぶ';fullscreen.setAttribute('aria-pressed',String(!!document.fullscreenElement))};
+   fullscreen.addEventListener('click',async()=>{
+     try{
+       if(document.fullscreenElement)await document.exitFullscreen();
+       else{
+         await document.documentElement.requestFullscreen();
+         try{await screen.orientation?.lock?.('landscape')}catch{}
+       }
+       updateFullscreen();
+     }catch{fullscreen.textContent='このブラウザでは全画面にできません'}
+   });
+   document.addEventListener('fullscreenchange',updateFullscreen);
+   updateFullscreen();controls.prepend(fullscreen);
+ }
  const panel=$('#toolPanel'),toggle=$('#toolToggle'),close=$('#mobileGameClose');
  function shut(){document.body.classList.remove('mobile-sheet-open');button.setAttribute('aria-expanded','false');if(panel)panel.hidden=true;if(toggle)toggle.setAttribute('aria-expanded','false');if(display)display.open=false;}
  function open(){if(!document.body.classList.contains('scene-live')&&!window.matchMedia('(max-width:1000px)').matches)return;document.body.classList.add('mobile-sheet-open');button.setAttribute('aria-expanded','true');if(panel)panel.hidden=false;if(toggle)toggle.setAttribute('aria-expanded','true');}
@@ -116,16 +133,31 @@ function setupMobileTopAndQuick(){
  rule.addEventListener('toggle',sync);help.addEventListener('toggle',sync);
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
  const landscape=window.matchMedia('(max-width:1000px) and (orientation:landscape)');
- const ensureClosed=()=>{if(landscape.matches)closeMenu()};
- ensureClosed();landscape.addEventListener?.('change',ensureClosed);
+ const originalParent=rule.parentNode,originalSibling=rule.nextSibling;
+ const arrangeRule=()=>{
+   // A hidden mobile sidebar must not hide the rule popover. Restore the DOM on desktop.
+   if(landscape.matches){
+     if(rule.parentNode!==document.body)document.body.append(rule);
+     closeMenu();
+   }else if(rule.parentNode!==originalParent){
+     if(originalSibling?.parentNode===originalParent)originalParent.insertBefore(rule,originalSibling);
+     else originalParent.append(rule);
+   }
+ };
+ arrangeRule();landscape.addEventListener?.('change',arrangeRule);
  const quick=document.createElement('div');quick.id='mobileQuickControls';quick.setAttribute('role','group');quick.setAttribute('aria-label','対局中の切替');
  for(const key of ['autoWin','calls','waits']){
    const source=document.querySelector('#toolPanel [data-toggle="'+key+'"]');
    if(!source)continue;
    const b=document.createElement('button');b.type='button';b.className='mobile-quick-toggle';b.dataset.toggle=key;
    const refresh=()=>{
-     b.textContent=source.textContent.trim().replace('待ち牌表示','待ち牌');
+     const label={autoWin:'和了',calls:'鳴き',waits:'待ち'}[key];
      const off=/OFF|無効/.test(source.textContent);
+     b.replaceChildren();
+     const name=document.createElement('span'),state=document.createElement('small');
+     name.textContent=label;state.textContent=off?'OFF':'ON';
+     b.append(name,state);
+     b.setAttribute('aria-label',label+' '+state.textContent);
      b.dataset.state=off?'off':'on';b.setAttribute('aria-pressed',String(!off));
    };
    b.addEventListener('click',()=>{source.click();queueMicrotask(refresh)});

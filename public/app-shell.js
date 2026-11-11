@@ -64,5 +64,7 @@ if(!play&&document.querySelector('#cc')&&!document.querySelector('#previewChinBt
  }
  // Independent UI layer: load after the existing game scripts without replacing the engine.
  const nextCss=document.createElement('link');nextCss.rel='stylesheet';nextCss.href='jansai-ui-next.css';document.head.append(nextCss);
+ // Final, single-purpose mobile layout layer is loaded after legacy visuals.
+ const mobileCss=document.createElement('link');mobileCss.rel='stylesheet';mobileCss.href='jansai-mobile-v5.css';document.head.append(mobileCss);
  const nextScript=document.createElement('script');nextScript.src='jansai-ui-next.js';document.body.append(nextScript);
 })();
