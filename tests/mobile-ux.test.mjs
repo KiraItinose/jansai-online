@@ -36,7 +36,9 @@ test('rule, help, exit are together top-right and panels are small popovers',()=
  assert.match(css,/#ruleSummary\[open\]/);
  assert.match(css,/#rightPane \.rules\[open\]/);
  assert.match(css,/width:min\(250px,48vw\)/);
- assert.match(css,/#jrOpenHistory\{display:none!important\}/);
+ assert.match(css,/#rightPane \.right-actions\{display:contents!important\}/);
+ assert.match(css,/#jrOpenHistory/);
+ assert.match(css,/#returnSetup\{display:none!important\}/);
 });
 
 test('compact 3D center keeps PC size and mobile content readable',()=>{

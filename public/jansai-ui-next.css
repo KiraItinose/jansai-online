@@ -426,8 +426,9 @@
    top:0!important;right:0!important;width:0!important;height:0!important;
    min-width:0!important;overflow:visible!important;
  }
- body.page-play.scene-live #rightPane .right-actions,
- body.page-play.scene-live #jrOpenHistory{display:none!important}
+ body.page-play.scene-live #rightPane .right-actions{display:contents!important}
+ body.page-play.scene-live #jrOpenHistory,
+ body.page-play.scene-live #returnSetup{display:none!important}
  body.page-play.scene-live #rightPane .rules[open]{pointer-events:auto!important}
 
  /* The original three switches are surfaced as small live proxies with one state source. */
