@@ -1,6 +1,28 @@
 (()=>{'use strict';
  const compact=matchMedia('(max-width:1000px)'),play=document.body.classList.contains('page-play');
  if(play){const notice=document.createElement('div');notice.id='phoneNotice';notice.textContent='横向きにすると、牌と操作ボタンが大きく表示されます';document.body.append(notice);const fit=()=>{if(compact.matches)document.querySelector('#ruleSummary')?.removeAttribute('open')};fit();compact.addEventListener?.('change',fit)}
+ // The kuikae restriction remains in game logic; hide only its redundant explanation.
+ if(play){
+  const help=document.querySelector('#rightPane .rules .help-scroll');
+  if(help){
+   for(const section of help.querySelectorAll('.help-block')){
+    if(section.querySelector('h3')?.textContent.includes('喰い替えなし'))section.remove();
+   }
+   for(const title of help.querySelectorAll('.help-block h3')){
+    if(title.textContent.startsWith('⑥ チンチロ'))title.textContent=title.textContent.replace('⑥','⑤');
+    if(title.textContent.startsWith('⑦ 操作の補足'))title.textContent=title.textContent.replace('⑦','⑥');
+   }
+  }
+  const ruleText=document.querySelector('#ruleText');
+  if(ruleText){
+   const hideLine=()=>{
+    for(const line of ruleText.querySelectorAll('.rule-line')){
+     if(line.querySelector('span')?.textContent.trim()==='喰い替え')line.remove();
+    }
+   };
+   hideLine();new MutationObserver(hideLine).observe(ruleText,{childList:true});
+  }
+ }
  if(!play){const bottom=document.querySelector('.lobby-bottom')||document.body;const button=document.createElement('button');button.id='pwaInstall';button.type='button';button.textContent='ホーム画面に追加';button.hidden=true;const status=document.createElement('p');status.id='pwaStatus';bottom.append(button,status);let prompt;
  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();prompt=e;button.hidden=false});button.onclick=async()=>{if(!prompt)return;await prompt.prompt();await prompt.userChoice;prompt=null;button.hidden=true};
  window.addEventListener('appinstalled',()=>{button.hidden=true;status.textContent='ホーム画面から雀彩を開けます'});

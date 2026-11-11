@@ -1,6 +1,6 @@
 'use strict';
 const PREFIX='jansuno:'+self.registration.scope+':';
-const CACHE=PREFIX+'0.5.7-cloudflare-ws6-pwa-refresh';
+const CACHE=PREFIX+'0.5.7-cloudflare-ws7-start-spin';
 const FILES=['./','index.html','jansuno-room-v0.5.7.html','jansuno-play-v0.5.7.html','webgl-table.js','webgl-table.css','sample-atlas.js','vendor/three.min.js','mobile.css','lobby.css','refinements.css','online.html','online.js','online.css','branding/jansai-logo.png','portraits/gold.png','portraits/rose.png','portraits/silver.png','portraits/violet.png','chinchiro-motion.js','app-shell.js','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png'];
 const URLS=FILES.map(p=>new URL(p,self.registration.scope).href);
 // Precache first, then activate the new fetch strategy without reloading a running match.
@@ -9,7 +9,7 @@ self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addA
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 // HTML and small interactive assets prefer the current deployment to stale PWA caches.
 // Bulky artwork remains cache-first to save bandwidth.
-const FRESH_PATHS=new Set(['/webgl-table.css','/webgl-table.js','/online.js','/app-shell.js']);
+const FRESH_PATHS=new Set(['/webgl-table.css','/webgl-table.js','/online.js','/app-shell.js','/chinchiro-motion.js','/lobby.css','/refinements.css']);
 self.addEventListener('fetch',e=>{
  if(e.request.method!=='GET')return;
  const url=new URL(e.request.url);url.hash='';

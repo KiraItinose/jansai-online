@@ -18,3 +18,16 @@
 
 /* 雀彩 title: transparent 3D lettering, no added plaque. */
 .jansai-logo{display:block;object-fit:contain;max-width:100%;height:auto}.page-room .jansai-logo{width:160px}.page-play .brand.slim{justify-content:center}.page-play .jansai-logo{width:132px}@media(max-width:900px){.page-play .jansai-logo{width:66px}.page-play .brand.slim{padding:0;gap:0}.page-room .jansai-logo{width:128px}}
+
+/* v0.5.7 Online — single clear start flow at the bottom of setup. */
+.page-room .start-step{margin-top:12px}
+.page-room .lobby-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:12px 28px 24px;align-items:stretch}
+.page-room .lobby-actions>#solo,.page-room .lobby-actions>#mk{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;min-height:61px;font-size:18px;line-height:1.35;font-weight:800;border-radius:12px;margin:0}
+.page-room .lobby-actions>#solo small,.page-room .lobby-actions>#mk small{display:block;font-size:11px;font-weight:400;opacity:.87;line-height:1.4}
+.page-room .lobby-actions>#mk{background:linear-gradient(105deg,#1b4c54,#153845);border:1px solid #a6c7bc;color:#f3e7c7}
+.page-room .lobby-actions>.joinline{margin:2px 0 0;padding:13px 14px;background:#0b252b;border:1px solid #55756b;border-radius:12px;display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;box-sizing:border-box}
+.page-room .joinline>label{font-size:12px;font-weight:700;color:#d1e3d9;text-align:left}
+.page-room .join-controls{display:flex;align-items:stretch;gap:8px;min-width:0;width:100%}
+.page-room .join-controls input#cd{flex:1 1 auto;width:100%;min-width:0;text-transform:uppercase;background:#09242a;color:#f9e6bb;font-size:15px;padding:10px 12px}
+.page-room .join-controls #jn{flex:0 0 96px;min-height:44px;font-size:14px}
+@media(max-width:650px){.page-room .lobby-actions{padding:12px 18px 20px}.page-room .join-controls #jn{flex-basis:78px}}

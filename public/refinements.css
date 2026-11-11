@@ -11,3 +11,16 @@ body.scene-live #sceneWait{width:max-content;max-width:min(340px,calc(100% - 16p
 .jansai-logo{display:block;object-fit:contain;max-width:100%;height:auto}.page-room .jansai-logo{width:160px}.page-play .brand.slim{justify-content:center}.page-play .jansai-logo{width:132px}@media(max-width:900px){.page-play .jansai-logo{width:66px}.page-play .brand.slim{padding:0;gap:0}.page-room .jansai-logo{width:128px}}
 /* Faces remain fully visible; crop clothing and unused background. */
 .page-play .seat-avatar,.scene-avatar,.page-play .jr-portrait,.page-play .jr-card .jr-portrait{background-size:auto 126%!important;background-position:50% 28%!important}
+
+/* Chinchiro: visible cube rotation fallback for browsers without Web Animations API. */
+@keyframes jansai-visible-dice-spin{
+  0%{transform:rotateX(calc(var(--endX) + 1080deg)) rotateY(calc(var(--endY) - 1080deg)) rotateZ(720deg)}
+  25%{transform:rotateX(calc(var(--endX) + 800deg)) rotateY(calc(var(--endY) - 800deg)) rotateZ(530deg)}
+  50%{transform:rotateX(calc(var(--endX) + 540deg)) rotateY(calc(var(--endY) - 540deg)) rotateZ(350deg)}
+  75%{transform:rotateX(calc(var(--endX) + 240deg)) rotateY(calc(var(--endY) - 240deg)) rotateZ(155deg)}
+  100%{transform:rotateX(var(--endX)) rotateY(var(--endY)) rotateZ(0deg)}
+}
+#chinchiroOverlay .die-position.rolling .die-cube{animation:jansai-visible-dice-spin 3s ease-out both;transform-style:preserve-3d;backface-visibility:visible}
+#chinchiroOverlay .die-position.rolling:nth-child(2) .die-cube{animation-duration:3.05s}
+#chinchiroOverlay .die-position.rolling:nth-child(3) .die-cube{animation-duration:2.95s}
+@media(prefers-reduced-motion:reduce){#chinchiroOverlay .die-position.rolling .die-cube{animation:none}}
