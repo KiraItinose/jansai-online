@@ -62,4 +62,7 @@ if(!play&&document.querySelector('#cc')&&!document.querySelector('#previewChinBt
  if((location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))&&'serviceWorker' in navigator){
  navigator.serviceWorker.register('sw.js').then(reg=>{const status=document.querySelector('#pwaStatus');const report=()=>{if(reg.waiting&&status)status.textContent='更新版があります。対局を終えて雀彩の画面をすべて閉じ、開き直すと反映されます。'};report();reg.addEventListener('updatefound',()=>reg.installing?.addEventListener('statechange',report));navigator.serviceWorker.ready.then(()=>{if(status&&!status.textContent)status.textContent='オフライン起動の準備ができました。対局中の状態は、画面を閉じると保存されません。'})}).catch(()=>{const status=document.querySelector('#pwaStatus');if(status)status.textContent='オフライン起動を準備できませんでした。オンラインで再度開いてください。'});
  }
+ // Independent UI layer: load after the existing game scripts without replacing the engine.
+ const nextCss=document.createElement('link');nextCss.rel='stylesheet';nextCss.href='jansai-ui-next.css';document.head.append(nextCss);
+ const nextScript=document.createElement('script');nextScript.src='jansai-ui-next.js';document.body.append(nextScript);
 })();
