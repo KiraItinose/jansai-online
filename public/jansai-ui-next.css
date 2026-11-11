@@ -15,7 +15,7 @@
 #chinchiroOverlay:not(.chin-rolling) .die-position .die-cube,#chinchiroPreview:not(.chin-rolling) .die-position .die-cube{visibility:hidden!important;animation:none!important}
 #chinchiroOverlay.chin-rolling .die-position .die-cube,#chinchiroPreview.chin-rolling .die-position .die-cube{visibility:visible!important;transform-style:preserve-3d}
 #chinchiroOverlay:not(.chin-rolling) .die-position:after,#chinchiroPreview:not(.chin-rolling) .die-position:after{opacity:.3}
-#mobileGameDrawer{display:contents}
+#mobileGameDrawer,#mobileGameControls{display:contents}
 #mobileGameToggle,#mobileGameHeading{display:none}
 @media(max-width:1000px){
  body.page-play #mobileGameToggle{display:block;position:fixed;right:max(8px,env(safe-area-inset-right));bottom:max(8px,env(safe-area-inset-bottom));z-index:1600;min-width:70px;min-height:44px;padding:8px 12px;border:1px solid #dcbe7b;border-radius:12px;background:#102b34ed;color:#ffe5ac;font-weight:750;box-shadow:0 3px 12px #0009}

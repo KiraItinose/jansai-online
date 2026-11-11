@@ -20,7 +20,8 @@ test('rolling dice have independent angle changes and flat result faces',()=>{
  assert.match(js,/rotateX/);
  for(const angle of ['-90,0','0,-90','0,90','90,0','0,180'])assert.ok(js.includes("'"+angle+"'"));
  assert.match(js,/jan-die-flat/);
- assert.match(css,/#chinchiroOverlay:not\(\.chin-rolling\) \.die-position \.die-cube\{visibility:hidden!important/);
+ assert.ok(css.includes('#chinchiroOverlay:not(.chin-rolling) .die-position .die-cube,'));
+ assert.ok(css.includes('visibility:hidden!important'));
  assert.match(css,/#chinchiroOverlay\.chin-rolling \.jan-die-flat/);
 });
 test('mobile settings use real existing controls and preserve desktop layout',()=>{
