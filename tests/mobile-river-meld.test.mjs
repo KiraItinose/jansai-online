@@ -27,5 +27,5 @@ test('four names remain at reference anchors and never intercept tile taps',()=>
  assert.match(css,/pointer-events:none!important/);
 });
 test('updated assets invalidate the old PWA',()=>{
- assert.match(file('sw.js'),/cloudflare-ws16-reference-frame/);
+ assert.match(file('sw.js'),/cloudflare-ws17-3d-start-results/);
 });

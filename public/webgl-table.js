@@ -5,9 +5,11 @@
 const $=s=>document.querySelector(s),tb=$('#tb');if(!tb)return;
 const host=document.createElement('div');host.id='sceneHost';host.innerHTML='<div id="sceneHUD"><div id="sceneDora"></div><div id="sceneTimer"></div><div id="sceneWait" role="status"></div><div id="sceneHint">牌をクリックして選択 → 再クリックで打牌 ｜ 卓を右ドラッグで視点移動</div><div id="sceneKeys"></div></div>';document.body.append(host);
 const actionArea=$('#actionArea'),actionParent=actionArea.parentNode,actionNext=actionArea.nextSibling;
-const hud=$('#sceneHUD'),keys=$('#sceneKeys'),settings=document.createElement('div');settings.innerHTML='<label for="rendererChoice">卓の表示</label><select id="rendererChoice"><option value="webgl">3D卓</option><option value="classic">従来表示</option></select><label for="cameraPreset">3Dの視点</label><select id="cameraPreset"><option value="table">対局視点</option><option value="low">低い視点</option><option value="overhead">俯瞰視点</option></select><label for="sceneQuality">3D画質</label><select id="sceneQuality"><option value="standard">標準（推奨）</option><option value="high">高画質（従来）</option><option value="light">軽量（動作優先）</option></select><div id="rendererStatus" role="status"></div>';
+const hud=$('#sceneHUD'),keys=$('#sceneKeys'),settings=document.createElement('div');settings.innerHTML='<input id="rendererChoice" type="hidden" value="webgl"><label for="cameraPreset">3Dの視点</label><select id="cameraPreset"><option value="table">対局視点</option><option value="low">低い視点</option><option value="overhead">俯瞰視点</option></select><label for="sceneQuality">3D画質</label><select id="sceneQuality"><option value="standard">標準（推奨）</option><option value="high">高画質（従来）</option><option value="light">軽量（動作優先）</option></select><div id="rendererStatus" role="status"></div>';
 $('#tileView').parentElement.prepend(settings);const mode=$('#rendererChoice'),preset=$('#cameraPreset'),quality=$('#sceneQuality'),status=$('#rendererStatus');
-const displayDock=document.createElement('details');displayDock.id='displayDock';displayDock.innerHTML='<summary>卓と牌の表示</summary><div class="display-panel"></div>';document.body.append(displayDock);displayDock.querySelector('div').append($('#tileView').closest('fieldset'),$('#resetPositions'));
+const displayDock=document.createElement('div');displayDock.id='displayDock';displayDock.hidden=true;document.body.append(displayDock);
+// Retain legacy hidden inputs for compatibility with saved games; no 2D appearance UI.
+displayDock.append($('#tileView').closest('fieldset'),$('#resetPositions'));
 $('#toolToggle').innerHTML='⚙ 対局中の切替';
 // Keep the drag grip unmistakable even if an older stylesheet has temporarily been cached.
 const toolGrip=$('#toolMove');
@@ -30,15 +32,7 @@ let scene,camera,renderer,root,enabled=false,failed=false,initialized=false,load
 const records=new Map(),faceMats=new Map(),riverFaceMats=new Map(),faceURLs=new Map(),seatCards=[],animations=new Set();
 let mobileHandOverlay=null;let meshes={},mats={},backMat,raycaster,pointer;const resources=[];
 const viewPreset={table:[54,38],low:[32,38],overhead:[66,38]};
-function mobileTableZoom(){
- try{
-  const n=Number(localStorage.getItem('jansai.mobile.tableZoom'));
-  if([1.04,1.12,1.20].includes(n))return n;
-  const previous={1.16:1.04,1.30:1.12,1.44:1.20,1.35:1.04,1.55:1.12,1.75:1.20};
-  if(previous[n])return previous[n];
- }catch{}
- return 1.12;
-}
+function mobileTableZoom(){return 1.04;}
 // Fit the hand in screen space, independently of the board-camera magnification.
 function mobileHandMetrics(viewWidth,count,pixelsPerUnit){
  const usable=Math.min(790,viewWidth*.80);
@@ -282,20 +276,49 @@ function resize(){
 }
 
 function animate(t){let active=false;for(const r of animations){const a=r.start,k=a.duration?Math.max(0,Math.min(1,(t-a.time)/a.duration)):1,e=1-Math.pow(1-k,3);r.group.position.lerpVectors(a.position,r.target,e);r.group.quaternion.slerpQuaternions(a.rotation,r.rotation,e);if(a.position.distanceTo(r.target)>35)r.group.position.y+=Math.sin(k*Math.PI)*18;if(k===1)animations.delete(r);else active=true;}return active;}
-function frame(t){raf=0;if(!enabled||document.hidden)return;try{if(dirty){syncTiles();dirty=false;}const active=animate(performance.now());for(const r of records.values())if(r.own)r.group.quaternion.copy(camera.quaternion);scene.updateMatrixWorld(true);layoutHUD();renderer.render(scene,camera);if(active)raf=requestAnimationFrame(frame)}catch(e){console.error(e);fallback('3D表示が停止したため従来表示に戻しました。')}}
+function frame(t){raf=0;if(!enabled||document.hidden)return;try{if(dirty){syncTiles();dirty=false;}const active=animate(performance.now());for(const r of records.values())if(r.own)r.group.quaternion.copy(camera.quaternion);scene.updateMatrixWorld(true);layoutHUD();renderer.render(scene,camera);if(!firstFrameReady)ready3D();if(active)raf=requestAnimationFrame(frame)}catch(e){console.error(e);fallback('3D描画が停止しました。')}}
 function invalidate(){dirty=true;if(enabled&&!raf)raf=requestAnimationFrame(frame)}
 function hit(e){const rect=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(pointer,camera);const candidates=[...records.values()].filter(r=>r.own&&r.legal).map(r=>r.group);const hits=raycaster.intersectObjects(candidates,true);for(const h of hits){let o=h.object;while(o&&!o.userData.record)o=o.parent;if(o)return o.userData.record;}return null;}
 function activateTile(r){if(!enabled||!r?.legal||!r.node?.isConnected)return;r.node.click();invalidate()}
 function input(){const c=renderer.domElement;c.addEventListener('contextmenu',e=>e.preventDefault());c.addEventListener('pointerdown',e=>{if(e.button===2){orbit={x:e.clientX,azimuth};c.setPointerCapture(e.pointerId);return}if(e.button!==0)return;const r=hit(e);pressed={key:r?.key,x:e.clientX,y:e.clientY};c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{if(orbit){azimuth=Math.max(-.35,Math.min(.35,orbit.azimuth+(e.clientX-orbit.x)*.0025));resize();invalidate();return;}const r=hit(e),next=r?.key||null;if(next!==hoverKey){hoverKey=next;c.style.cursor=r?'pointer':'default';invalidate()}});c.addEventListener('pointerup',e=>{if(orbit){orbit=null;return}if(!pressed)return;const r=records.get(pressed.key),distance=Math.hypot(e.clientX-pressed.x,e.clientY-pressed.y);if(r){if(distance>35&&e.clientY<pressed.y-25){if(!r.node.classList.contains('selected'))activateTile(r);$('#discardConfirm').click();invalidate()}else if(distance<10&&hit(e)?.key===r.key)activateTile(r);}pressed=null});c.addEventListener('pointercancel',()=>{pressed=null;orbit=null});c.addEventListener('pointerleave',()=>{hoverKey=null;invalidate()});}
-async function initialize(){if(!window.THREE)throw Error('3Dライブラリを読み込めません');renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.prepend(renderer.domElement);renderer.domElement.id='worldCanvas';renderer.domElement.setAttribute('aria-label','雀彩 3D対局卓');renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();failed=true;fallback('3D描画が中断されました。従来表示へ戻しました。')});scene=new THREE.Scene();scene.background=null;camera=new THREE.PerspectiveCamera(38,1,1,3000);root=new THREE.Group();scene.add(root);raycaster=new THREE.Raycaster();pointer=new THREE.Vector2();
+async function initialize(){if(!window.THREE)throw Error('3Dライブラリを読み込めません');renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;host.prepend(renderer.domElement);renderer.domElement.id='worldCanvas';renderer.domElement.setAttribute('aria-label','雀彩 3D対局卓');renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();failed=true;fallback('3D描画が中断されました。')});scene=new THREE.Scene();scene.background=null;camera=new THREE.PerspectiveCamera(38,1,1,3000);root=new THREE.Group();scene.add(root);raycaster=new THREE.Raycaster();pointer=new THREE.Vector2();
  const env=canvas(512,256),ec=env.getContext('2d'),gr=ec.createLinearGradient(0,0,0,256);gr.addColorStop(0,'#8e9da6');gr.addColorStop(.5,'#3c484a');gr.addColorStop(1,'#0d1517');ec.fillStyle=gr;ec.fillRect(0,0,512,256);ec.fillStyle='#fff4dc';ec.fillRect(45,28,130,57);ec.fillStyle='#cadce9';ec.fillRect(350,43,36,90);const et=texture(env);et.mapping=THREE.EquirectangularReflectionMapping;scene.environment=et;
  scene.add(new THREE.HemisphereLight(0xeaf4ff,0x283020,1.1));const sun=new THREE.DirectionalLight(0xffe3bd,2.8);sun.position.set(-210,460,260);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sunlight=sun;Object.assign(sun.shadow.camera,{left:-450,right:450,top:380,bottom:-380,near:10,far:1100});sun.shadow.bias=-.0001;sun.shadow.normalBias=.35;sun.shadow.radius=3;scene.add(sun);const fill=new THREE.DirectionalLight(0xbcd9ed,.8);fill.position.set(260,220,-150);scene.add(fill);
  applyQuality();buildTable();buildTileMaterials();await loadFaces();input();initialized=true;
  window.__jansuno3d={getStats:()=>({enabled,viewport:[w,h],camera:camera.type,tiles:records.size,animating:animations.size,geometry:renderer.info.memory.geometries,texture:renderer.info.memory.textures,calls:renderer.info.render.calls,quality:quality.value,pixelRatio:renderer.getPixelRatio(),shadows:renderer.shadowMap.enabled,ratio:[21,28,16.5],physicalBounds:(()=>{meshes.ivory.computeBoundingBox();meshes.red.computeBoundingBox();const box=meshes.ivory.boundingBox.clone().translate(new THREE.Vector3(0,0,1.75));box.union(meshes.red.boundingBox.clone().translate(new THREE.Vector3(0,0,-6.5)));return box.getSize(new THREE.Vector3()).toArray()})(),faceCount:faceMats.size,hiddenFaces:[...records.values()].filter(r=>r.hidden&&r.face).length}),projectTile:id=>{const r=records.get('id:'+id);if(!r)return null;const p=project(r.group.localToWorld(new THREE.Vector3(0,0,8.3))),b=host.getBoundingClientRect();return {x:p.x+b.x,y:p.y+b.y,legal:r.legal}},projectWorld:(x,y,z)=>project(new THREE.Vector3(x,y,z)),inspectLayout:()=>[...records.values()].map(r=>({key:r.key,own:r.own,zone:r.node?.closest('.meld-zone,.rv')?.id,position:r.group.position.toArray(),frontError:r.own?r.group.quaternion.angleTo(camera.quaternion):null})),centerPreview:()=>centerCanvas.toDataURL(),riichiCount:()=>riichiSticks.filter(s=>s.visible).length,facePreview:name=>faceURLs.get(name),hitTest:(x,y)=>hit({clientX:x,clientY:y})?.key, invalidate};
 }
-function fallback(message){enabled=false;document.body.classList.remove('scene-live');if(actionArea.parentNode!==actionParent)actionParent.insertBefore(actionArea,actionNext);actionArea.style.removeProperty('bottom');$('#tileView').disabled=false;$('#tableLight').disabled=false;preset.disabled=true;status.textContent=message;}
-async function activate(){if(mode.value==='classic'){fallback('従来表示');return}if(failed){fallback('3D表示の再試行には画面を再読み込みしてください');return}if(loading)return;try{loading=true;status.textContent='3D卓を準備しています…';if(!initialized)await initialize();if(mode.value!=='webgl')return;document.body.classList.add('scene-live');document.body.append(actionArea);enabled=true;$('#tileView').disabled=true;$('#tableLight').disabled=true;preset.disabled=false;status.textContent='3D画質：'+quality.options[quality.selectedIndex].textContent+'｜対局中も変更できます';resize();invalidate();}catch(e){failed=true;fallback('3D表示を開始できませんでした。従来表示で動作中。');console.warn(e.message)}finally{loading=false;}}
-try{mode.value=localStorage.getItem('jansuno.scene.mode')==='classic'?'classic':'webgl';const p=localStorage.getItem('jansuno.scene.camera');if(viewPreset[p])preset.value=p;const q=localStorage.getItem('jansuno.scene.quality');if(qualityModes[q])quality.value=q}catch{}
-mode.onchange=()=>{try{localStorage.setItem('jansuno.scene.mode',mode.value)}catch{}activate()};quality.onchange=()=>{try{localStorage.setItem('jansuno.scene.quality',quality.value)}catch{}applyQuality();if(enabled)status.textContent='3D画質：'+quality.options[quality.selectedIndex].textContent};preset.onchange=()=>{try{localStorage.setItem('jansuno.scene.camera',preset.value)}catch{}azimuth=0;if(initialized){resize();invalidate()}};
+const startupMask=document.createElement('div');startupMask.id='jansaiStartupMask';startupMask.setAttribute('role','status');startupMask.textContent='3D卓を準備しています…';document.body.append(startupMask);
+let firstFrameReady=false;
+function ready3D(){
+ if(firstFrameReady)return;
+ firstFrameReady=true;
+ document.body.classList.add('scene-ready');
+ window.__jansaiResolve3D?.();
+}
+function fallback(message){
+ enabled=false;failed=true;
+ document.body.classList.add('scene-failed');
+ startupMask.textContent=message+'　画面を再読み込みして再試行してください。';
+ status.textContent=message;
+ window.__jansaiReject3D?.(new Error(message));
+}
+async function activate(){
+ if(failed){fallback('3D描画を開始できませんでした');return}
+ if(loading)return;
+ try{
+  loading=true;mode.value='webgl';status.textContent='3D卓を準備しています…';
+  if(!initialized)await initialize();
+  document.body.classList.add('scene-live');document.body.append(actionArea);
+  enabled=true;$('#tileView').disabled=true;$('#tableLight').disabled=true;
+  preset.disabled=false;
+  status.textContent='3D画質：'+quality.options[quality.selectedIndex].textContent;
+  resize();invalidate();
+ }catch(e){
+  fallback('3D描画に失敗しました：'+(e?.message||'不明なエラー'));
+  console.warn(e);
+ }finally{loading=false}
+}
+try{mode.value='webgl';const p=localStorage.getItem('jansuno.scene.camera');if(viewPreset[p])preset.value=p;const q=localStorage.getItem('jansuno.scene.quality');if(qualityModes[q])quality.value=q}catch{}
+mode.onchange=()=>{mode.value='webgl'};quality.onchange=()=>{try{localStorage.setItem('jansuno.scene.quality',quality.value)}catch{}applyQuality();if(enabled)status.textContent='3D画質：'+quality.options[quality.selectedIndex].textContent};preset.onchange=()=>{try{localStorage.setItem('jansuno.scene.camera',preset.value)}catch{}azimuth=0;if(initialized){resize();invalidate()}};
 new MutationObserver(invalidate).observe(tb,{childList:true,subtree:true,attributes:true,attributeFilter:['class','hidden']});window.addEventListener('resize',()=>{if(enabled){resize();invalidate()}});new ResizeObserver(()=>{if(enabled){resize();invalidate()}}).observe(host);document.addEventListener('visibilitychange',invalidate);document.fonts?.ready.then(()=>{centerSig='';invalidate()});activate();
 })();

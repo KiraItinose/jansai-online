@@ -18,12 +18,8 @@ test('reference hand is fixed in a camera-facing bottom row',()=>{
  assert.match(s,/rot\.copy\(camera\.quaternion\)/);
  assert.match(s,/mobileHandOverlay=landscapePhone\?mobileForegroundHand/);
 });
-test('mobile zoom settings keep backwards-compatible values',()=>{
- const s=file('webgl-table.js'),m=s.match(/function mobileTableZoom\(\)\{[\s\S]*?\n\}/);assert.ok(m);
- const localStorage={getItem:()=>null};
- const fn=vm.runInNewContext(m[0]+'\nmobileTableZoom',{localStorage});
- assert.equal(fn(),1.12);
- for(const [stored,expected] of [['1.04',1.04],['1.20',1.2],['1.30',1.12],['1.75',1.2],['999',1.12]]){
-  localStorage.getItem=()=>stored;assert.equal(fn(),expected);
- }
+test('mobile whole-table view is fixed from startup',()=>{
+ const s=file('webgl-table.js');
+ assert.match(s,/function mobileTableZoom\(\)\{return 1\.04;\}/);
+ assert.doesNotMatch(s,/localStorage\.getItem\('jansai\.mobile\.tableZoom'\)/);
 });

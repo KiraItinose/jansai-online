@@ -340,3 +340,184 @@
   body.page-play.scene-live #sceneHUD .scene-seat>div{width:65px!important;max-width:65px!important}
   body.page-play.scene-live #actionArea:not(.end-actions){bottom:75px!important}
 }
+
+/* v7: Simple 3D settings below the three quick switches; result modals within landscape viewport. */
+@media (max-width:1000px) and (orientation:landscape) {
+ body.page-play.scene-live #mobileQuickControls{
+   bottom:max(48px,calc(env(safe-area-inset-bottom) + 48px))!important;
+   gap:3px!important;z-index:1750!important;
+ }
+ body.page-play.scene-live #mobileGameToggle{
+   left:max(5px,env(safe-area-inset-left))!important;
+   right:auto!important;bottom:max(7px,calc(env(safe-area-inset-bottom) + 7px))!important;
+   width:58px!important;min-width:58px!important;
+   height:34px!important;min-height:34px!important;
+   font-size:0!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameDrawer{
+   display:flex!important;position:fixed!important;
+   left:max(69px,calc(env(safe-area-inset-left) + 69px))!important;
+   right:auto!important;top:auto!important;bottom:max(7px,calc(env(safe-area-inset-bottom) + 7px))!important;
+   width:min(235px,47vw)!important;max-height:min(57dvh,215px)!important;
+   box-sizing:border-box!important;overflow:hidden!important;
+   padding:0!important;background:#081e26f1!important;
+   border:1px solid #bea474!important;border-radius:10px!important;
+   z-index:1900!important;pointer-events:auto!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameControls{
+   box-sizing:border-box!important;width:100%!important;
+   display:flex!important;flex-direction:column!important;
+   gap:8px!important;padding:9px!important;
+   max-height:calc(57dvh - 35px)!important;
+   overflow-y:auto!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameControls .mobile-scene-setting{
+   display:flex!important;flex-direction:column!important;
+   gap:5px!important;color:#f4e1b5!important;
+   font-size:12px!important;font-weight:700!important;
+ }
+ body.page-play.mobile-sheet-open #mobileGameControls .mobile-scene-setting select{
+   display:block!important;box-sizing:border-box!important;
+   width:100%!important;min-height:36px!important;
+   padding:5px!important;border:1px solid #ad9268!important;
+   border-radius:6px!important;background:#14343c!important;
+   color:#fff0cc!important;font-size:12px!important;
+ }
+ /* The retired controls are hidden from both standalone controls and mirror settings. */
+ body.page-play.scene-live #displayDock,
+ body.page-play.scene-live #toolPanel .visual-controls,
+ body.page-play.scene-live #resetPositions {display:none!important}
+
+ /* All four result stages fit within screen height; scrolling stays inside the card. */
+ body.page-play .jr-overlay{
+   box-sizing:border-box!important;inset:0!important;
+   padding:5px 7px!important;align-items:center!important;justify-content:center!important;
+ }
+ body.page-play .jr-card{
+   box-sizing:border-box!important;
+   width:min(1000px,calc(100vw - 14px))!important;
+   height:calc(100dvh - 10px)!important;min-height:0!important;
+   max-height:calc(100dvh - 10px)!important;
+   display:flex!important;flex-direction:column!important;
+   border-radius:12px!important;overflow:hidden!important;
+ }
+ body.page-play .jr-header{
+   flex:0 0 auto!important;padding:5px 12px 4px!important;gap:0!important;
+ }
+ body.page-play .jr-header .jr-eyebrow{display:none!important}
+ body.page-play .jr-header h2{font-size:clamp(17px,3.7dvh,23px)!important;line-height:1.1!important}
+ body.page-play .jr-content{
+   box-sizing:border-box!important;flex:1 1 auto!important;min-height:0!important;
+   overflow-y:auto!important;overscroll-behavior:contain!important;
+   padding:6px 10px!important;
+ }
+ body.page-play .jr-footer{
+   flex:0 0 auto!important;padding:5px 10px!important;gap:8px!important;
+   justify-content:flex-end!important;
+ }
+ body.page-play .jr-footer button{
+   min-height:34px!important;padding:6px 12px!important;
+   font-size:12px!important;border-radius:7px!important;
+ }
+ body.page-play .jr-agari-layout{
+   display:grid!important;grid-template-columns:minmax(95px,21%) minmax(0,1fr)!important;
+   gap:9px!important;align-items:stretch!important;min-height:0!important;
+ }
+ body.page-play .jr-hero{padding:5px!important;border-radius:9px!important}
+ body.page-play .jr-portrait{
+   width:clamp(43px,11dvh,78px)!important;height:clamp(43px,11dvh,78px)!important;
+   border-width:2px!important;
+ }
+ body.page-play .jr-hero .jr-insignia{
+   width:27px!important;height:27px!important;font-size:16px!important;
+   top:22%!important;left:calc(50% + 19px)!important;
+ }
+ body.page-play .jr-hero-name{margin-top:7px!important;font-size:12px!important}
+ body.page-play .jr-hero-kind{margin-top:3px!important;font-size:16px!important}
+ body.page-play .jr-hero-sub{margin-top:2px!important;font-size:10px!important}
+ body.page-play .jr-agari-data{gap:5px!important;justify-content:space-evenly!important}
+ body.page-play .jr-tiles{
+   box-sizing:border-box!important;width:100%!important;
+   padding:3px 1px 5px!important;gap:2px!important;overflow-x:auto!important;min-height:0!important;
+ }
+ body.page-play .jr-tiles .t{
+   box-sizing:border-box!important;flex:0 0 clamp(19px,2.65vw,29px)!important;
+   --tw:clamp(19px,2.65vw,29px)!important;
+   --th:clamp(27px,3.7vw,40px)!important;
+   width:var(--tw)!important;height:var(--th)!important;
+ }
+ body.page-play .jr-tiles-sep{flex-basis:8px!important}
+ body.page-play .jr-exposed{min-height:28px!important;gap:5px!important}
+ body.page-play .jr-yaku{font-size:11px!important;line-height:1.35!important;min-height:0!important}
+ body.page-play .jr-tally{
+   gap:8px!important;padding-top:6px!important;font-size:12px!important;
+ }
+ body.page-play .jr-tally strong{font-size:clamp(23px,6dvh,36px)!important}
+ body.page-play .jr-tally small{font-size:11px!important}
+ body.page-play .jr-from{font-size:10px!important}
+ body.page-play .jr-transfer-head,
+ body.page-play .jr-match-head{margin:1px 0 6px!important;font-size:14px!important}
+ body.page-play .jr-transfer-list,
+ body.page-play .jr-result-list{gap:4px!important;max-width:none!important}
+ body.page-play .jr-transfer-row{
+   box-sizing:border-box!important;display:grid!important;
+   grid-template-columns:25px minmax(55px,1.2fr) minmax(54px,.8fr) 12px minmax(60px,.85fr) minmax(57px,.8fr)!important;
+   gap:4px!important;min-height:42px!important;
+   padding:5px 8px!important;border-radius:7px!important;
+ }
+ body.page-play .jr-result-row{
+   box-sizing:border-box!important;display:grid!important;
+   grid-template-columns:34px minmax(72px,1.2fr) minmax(73px,.9fr) minmax(55px,.8fr) minmax(135px,1.6fr)!important;
+   gap:5px!important;min-height:43px!important;
+   padding:5px 8px!important;border-radius:7px!important;
+ }
+ body.page-play .jr-rank,.page-play .jr-rank-1{font-size:19px!important}
+ body.page-play .jr-person{font-size:12px!important}
+ body.page-play .jr-original,.page-play .jr-delta{font-size:11px!important}
+ body.page-play .jr-new{font-size:14px!important}
+ body.page-play .jr-result-row .jr-counts{
+   display:flex!important;flex-wrap:wrap!important;
+   justify-content:flex-end!important;gap:2px 7px!important;
+   font-size:9px!important;min-width:0!important;
+ }
+ body.page-play .jr-result-row .jr-counts span{font-size:9px!important}
+ body.page-play .jr-result-row .jr-counts b{font-size:11px!important}
+ body.page-play .jr-muted{font-size:10px!important;margin:5px 0!important}
+
+ /* The live Chinchiro dialog keeps its working dice animation, with only dimensions changed. */
+ body.page-play #chinchiroOverlay{
+   box-sizing:border-box!important;padding:5px!important;
+   overflow:auto!important;align-items:center!important;justify-content:center!important;
+ }
+ body.page-play #chinchiroOverlay .chin-panel{
+   box-sizing:border-box!important;
+   width:min(540px,calc(100vw - 12px))!important;
+   max-height:calc(100dvh - 10px)!important;
+   overflow:auto!important;padding:6px 12px 8px!important;
+   border-radius:11px!important;
+ }
+ body.page-play #chinchiroOverlay .chin-title{
+   font-size:clamp(16px,4dvh,22px)!important;margin:0 0 2px!important;
+ }
+ body.page-play #chinchiroOverlay .chin-sub{margin:0 0 4px!important;font-size:11px!important}
+ body.page-play #chinchiroOverlay .chin-bowl{
+   box-sizing:border-box!important;width:min(320px,40vw,47dvh)!important;
+   aspect-ratio:1.62!important;border-width:10px!important;
+   margin:2px auto!important;
+ }
+ body.page-play #chinchiroOverlay .die-position{--dieSize:clamp(30px,7dvh,44px)!important}
+ body.page-play #chinchiroOverlay .chin-result{
+   margin:3px auto 1px!important;font-size:13px!important;min-height:18px!important;
+ }
+ body.page-play #chinchiroOverlay .chin-desc{margin:2px auto!important;font-size:10px!important}
+ body.page-play #chinchiroOverlay .chin-throw{
+   min-height:31px!important;margin-top:4px!important;padding:5px 16px!important;font-size:12px!important;
+ }
+}
+
+/* Retired tool dock remains as the internal source of truth for the three live switches. */
+@media (max-width:1000px) and (orientation:landscape) {
+ body.page-play.scene-live #toolDock{display:none!important}
+ body.page-play.scene-live #displayDock{display:none!important}
+ body.page-play.scene-live #mobileGameDrawer #toolDock{display:none!important}
+}

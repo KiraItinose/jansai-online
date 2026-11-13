@@ -73,48 +73,36 @@ function setupDice(){
 }
 function setupMobileMatch(){
  if(!document.body.classList.contains('page-play')||$('#mobileGameToggle'))return;
- const dock=$('#toolDock'),display=$('#displayDock');if(!dock)return;
- const button=document.createElement('button');button.type='button';button.id='mobileGameToggle';button.textContent='⚙ 設定';button.setAttribute('aria-label','対局中の設定を開く');button.setAttribute('aria-expanded','false');
- const drawer=document.createElement('section');drawer.id='mobileGameDrawer';drawer.setAttribute('aria-label','対局中の設定');
- drawer.innerHTML='<div id="mobileGameHeading"><strong>対局中の設定</strong><button id="mobileGameClose" type="button" aria-label="設定を閉じる">閉じる ×</button></div><div id="mobileGameControls"></div>';
+ const button=document.createElement('button');button.type='button';button.id='mobileGameToggle';
+ button.textContent='⚙ 設定';button.setAttribute('aria-label','3D卓の設定を開く');button.setAttribute('aria-expanded','false');
+ const drawer=document.createElement('section');drawer.id='mobileGameDrawer';drawer.setAttribute('aria-label','3D卓の設定');
+ drawer.innerHTML='<div id="mobileGameHeading"><strong>3D卓の設定</strong><button id="mobileGameClose" type="button" aria-label="設定を閉じる">閉じる ×</button></div><div id="mobileGameControls"></div>';
  document.body.append(button,drawer);
- const controls=$('#mobileGameControls');
- const zoomBox=document.createElement('label');zoomBox.className='mobile-zoom-control';
- zoomBox.innerHTML='<span>卓の見える範囲</span><select id="mobileTableZoom" aria-label="スマホの卓の見える範囲"><option value="1.04">卓全体</option><option value="1.12">標準（推奨）</option><option value="1.20">近くから見る</option></select>';
- controls.append(zoomBox);
- const zoomSelect=zoomBox.querySelector('select');
- try{
-   const stored=localStorage.getItem('jansai.mobile.tableZoom');
-   const legacy={'1.16':'1.04','1.30':'1.12','1.44':'1.20','1.35':'1.04','1.55':'1.12','1.75':'1.20'};
-   zoomSelect.value=['1.04','1.12','1.20'].includes(stored)?stored:(legacy[stored]||'1.12');
- }catch{zoomSelect.value='1.12'}
- zoomSelect.addEventListener('change',()=>{try{localStorage.setItem('jansai.mobile.tableZoom',zoomSelect.value)}catch{}window.dispatchEvent(new Event('resize'))});
- controls.append(dock);if(display)controls.append(display);
- // Fullscreen is an opt-in user gesture; never hide system UI automatically.
- if(typeof document.documentElement.requestFullscreen==='function'){
-   const fullscreen=document.createElement('button');fullscreen.type='button';fullscreen.id='mobileFullscreenToggle';
-   const updateFullscreen=()=>{fullscreen.textContent=document.fullscreenElement?'全画面を終了':'全画面で遊ぶ';fullscreen.setAttribute('aria-pressed',String(!!document.fullscreenElement))};
-   fullscreen.addEventListener('click',async()=>{
-     try{
-       if(document.fullscreenElement)await document.exitFullscreen();
-       else{
-         await document.documentElement.requestFullscreen();
-         try{await screen.orientation?.lock?.('landscape')}catch{}
-       }
-       updateFullscreen();
-     }catch{fullscreen.textContent='このブラウザでは全画面にできません'}
-   });
-   document.addEventListener('fullscreenchange',updateFullscreen);
-   updateFullscreen();controls.prepend(fullscreen);
+ const controls=drawer.querySelector('#mobileGameControls');
+ function addMirror(sourceId,label,id){
+   const source=$('#'+sourceId);if(!source)return;
+   const holder=document.createElement('label');holder.className='mobile-scene-setting';holder.textContent=label;
+   const select=document.createElement('select');select.id=id;select.setAttribute('aria-label',label);
+   for(const option of source.options){
+     const node=document.createElement('option');node.value=option.value;node.textContent=option.textContent;select.append(node);
+   }
+   select.value=source.value;
+   select.addEventListener('change',()=>{source.value=select.value;source.dispatchEvent(new Event('change',{bubbles:true}))});
+   source.addEventListener('change',()=>{select.value=source.value});
+   holder.append(select);controls.append(holder);
  }
- const panel=$('#toolPanel'),toggle=$('#toolToggle'),close=$('#mobileGameClose');
- function shut(){document.body.classList.remove('mobile-sheet-open');button.setAttribute('aria-expanded','false');if(panel)panel.hidden=true;if(toggle)toggle.setAttribute('aria-expanded','false');if(display)display.open=false;}
- function open(){if(!document.body.classList.contains('scene-live')&&!window.matchMedia('(max-width:1000px)').matches)return;document.body.classList.add('mobile-sheet-open');button.setAttribute('aria-expanded','true');if(panel)panel.hidden=false;if(toggle)toggle.setAttribute('aria-expanded','true');}
- button.addEventListener('click',()=>document.body.classList.contains('mobile-sheet-open')?shut():open());
+ addMirror('cameraPreset','3Dの視点','mobileCameraPreset');
+ addMirror('sceneQuality','3D画質','mobileSceneQuality');
+ const close=drawer.querySelector('#mobileGameClose');
+ function shut(){document.body.classList.remove('mobile-sheet-open');button.setAttribute('aria-expanded','false')}
+ button.addEventListener('click',()=>{
+   const open=!document.body.classList.contains('mobile-sheet-open');
+   document.body.classList.toggle('mobile-sheet-open',open);
+   button.setAttribute('aria-expanded',String(open));
+ });
  close.addEventListener('click',shut);
- drawer.addEventListener('click',event=>{if(event.target===drawer)shut();});
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('mobile-sheet-open'))shut();});
- window.matchMedia('(min-width:1001px)').addEventListener?.('change',event=>{if(event.matches)shut();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')shut()});
+ window.matchMedia('(min-width:1001px)').addEventListener?.('change',event=>{if(event.matches)shut()});
 }
 function setupMobileTopAndQuick(){
  if(!document.body.classList.contains('page-play')||document.querySelector('#mobileTopControls'))return;

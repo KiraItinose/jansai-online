@@ -20,8 +20,17 @@ test('three-dimensional center is compact on the reference camera, not desktop',
  assert.match(w,/centerCanvas=canvas\(2048,2048\)/);
  assert.match(w,/raycaster\.intersectObjects\(candidates,true\)/);
 });
-test('fullscreen button requires a direct user gesture',()=>{
+test('installed PWA requests fullscreen; browser tabs are not forced',()=>{
  const ui=file('jansai-ui-next.js');
- assert.match(ui,/fullscreen\.addEventListener\('click',async/);
- assert.match(ui,/document\.documentElement\.requestFullscreen\(\)/);
+ const manifest=JSON.parse(file('manifest.webmanifest'));
+ assert.equal(manifest.display,'fullscreen');
+ assert.equal(manifest.orientation,'landscape');
+ assert.doesNotMatch(ui,/requestFullscreen/);
+ assert.doesNotMatch(ui,/mobileFullscreenToggle/);
+});
+test('settings panel contains only camera and quality',()=>{
+ const ui=file('jansai-ui-next.js');
+ assert.match(ui,/addMirror\('cameraPreset','3Dの視点'/);
+ assert.match(ui,/addMirror\('sceneQuality','3D画質'/);
+ assert.doesNotMatch(ui,/id="mobileTableZoom"/);
 });

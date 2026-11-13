@@ -1560,7 +1560,15 @@ body.page-play{background:radial-gradient(ellipse at 48% 44%,#193643 0%,#091824 
 .page-play .jr-card .t .j3d{transform:none!important;width:100%;height:100%}.page-play .jr-card .t .j3d-front{transform:none!important;width:100%;height:100%;background-size:100% 100%;border-radius:5px;background-color:#efdfc7}
 .page-play .jr-card .t .j3d-face:not(.j3d-front){display:none}
 @media(max-width:850px){.page-play .jr-card .jr-result-row{grid-template-columns:36px 1fr 100px 80px}.page-play .jr-card .jr-counts{grid-column:2/-1}}
-</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#08232c"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="stylesheet" href="mobile.css"><link rel="stylesheet" href="refinements.css"></head><body class="page-play"><div id="app"><div id="matchLayout">
+</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#08232c"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="stylesheet" href="mobile.css"><link rel="stylesheet" href="refinements.css"><style id="jansai3d-startup-css">
+body.page-play:not(.scene-ready) #tb,
+body.page-play:not(.scene-ready) #matchLayout{visibility:hidden!important}
+#jansaiStartupMask{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#061a21;color:#f6dda7;font:700 clamp(16px,3vw,23px) system-ui,sans-serif;z-index:2600;pointer-events:auto;text-align:center;padding:24px}
+body.scene-ready #jansaiStartupMask{display:none!important}
+body.page-play.scene-failed #jansaiStartupMask{background:#081b25}
+</style><script>
+window.Jansai3DReady=new Promise((resolve,reject)=>{window.__jansaiResolve3D=resolve;window.__jansaiReject3D=reject});
+</script></head><body class="page-play"><div id="app"><div id="matchLayout">
 <aside id="leftPane" aria-label="対局設定とツール"><div class="side-top"><div class="brand slim"><img class="jansai-logo" src="branding/jansai-logo.png" alt="雀彩（じゃんさい）" width="132" height="74"></div><div id="matchSettings"></div></div>
 <details class="side-card" id="ruleSummary" open><summary>対局ルール</summary><div id="seatNotice"></div><div id="ruleText">対局を準備しています</div></details>
 <div id="toolDock"><div class="tool-dock-head"><button id="toolToggle" type="button" aria-expanded="false" aria-controls="toolPanel">⚙ ツール <span>›</span></button><button id="toolMove" type="button" title="ドラッグまたは矢印キーで移動" aria-label="ツールの移動">⠿</button></div><div id="toolPanel" hidden><div class="tool-title">対局中の切替</div><button type="button" data-toggle="autoWin">自動和了 ON</button><button type="button" data-toggle="calls">鳴き ON</button><button type="button" data-toggle="waits">待ち牌表示 ON</button><fieldset class="visual-controls"><legend>卓と牌の表示</legend><label for="tileView">立体感</label><select id="tileView"><option value="standard">標準</option><option value="depth">奥行き強調</option><option value="light">軽量</option></select><label for="tableLight">卓の明るさ</label><select id="tableLight"><option value="studio">落ち着いた光</option><option value="bright">明るい卓</option></select><small>表示だけを変更します。設定はこのブラウザに保存されます。</small></fieldset><button type="button" id="resetPositions">表示位置を初期化</button></div></div>
@@ -2639,6 +2647,7 @@ const settingsText=c=>`${c.rounds===1?'一局勝負':c.rounds===4?'東風戦':'�
 $('#matchSettings').textContent=settingsText(cfg);
 async function run(){
  if(!data){$('#msg').textContent='設定ページから対局を開始してください。';$('#waitingLaunch').hidden=false;return}
+ await window.Jansai3DReady;
  if(embedded){
   role=data.host?'host':'guest';mySeat=data.seat;ui.setRoleSeat(role,mySeat);$('#seatNotice').textContent='オンライン対局 ／ '+ '東南西北'[mySeat]+'家';
   window.addEventListener('message',e=>{if(e.source!==parent||e.origin!==location.origin||!e.data?.jansai)return;const m=e.data;

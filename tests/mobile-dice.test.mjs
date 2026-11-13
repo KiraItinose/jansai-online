@@ -8,7 +8,7 @@ test('standalone mobile layout loads last without touching the engine',()=>{
  assert.doesNotThrow(()=>new Script(ui));
  assert.match(shell,/jansai-mobile-v5\.css/);
  assert.match(shell,/jansai-ui-next\.js/);
- assert.match(sw,/cloudflare-ws16-reference-frame/);
+ assert.match(sw,/cloudflare-ws17-3d-start-results/);
  assert.match(sw,/jansai-mobile-v5\.css/);
 });
 test('chinchiro preview still uses its existing animation and clean settled faces',()=>{
