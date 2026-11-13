@@ -157,3 +157,20 @@
  body.page-play.scene-live #actionArea:not(.end-actions){right:58px!important;max-width:60vw!important}
 }
 /* Mobile v5 layout is maintained separately in jansai-mobile-v5.css. */
+
+/* The 3D camera/quality controls are also accessible from the desktop tool dock. */
+body.page-play #toolPanel .scene-3d-settings{
+ display:flex;flex-direction:column;gap:6px;
+ padding:10px 0 2px;margin-top:10px;border-top:1px solid #baa37166;
+}
+body.page-play #toolPanel .scene-3d-settings label{
+ font-size:12px;font-weight:750;color:#f5dfad;
+}
+body.page-play #toolPanel .scene-3d-settings select{
+ box-sizing:border-box;width:100%;min-height:36px;
+ border-radius:7px;border:1px solid #aa956a;
+ background:#163540;color:#ffecc6;padding:6px;
+}
+body.page-play #toolPanel .scene-3d-settings #rendererStatus{
+ font-size:10px;color:#abc7ca;line-height:1.5;
+}

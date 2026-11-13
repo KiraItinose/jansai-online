@@ -19,6 +19,7 @@ test('only the 3D renderer remains available',()=>{
  const webgl=file('webgl-table.js');
  assert.match(webgl,/input id="rendererChoice" type="hidden" value="webgl"/);
  assert.doesNotMatch(webgl,/<option value="classic">/);
+ assert.match(webgl,/\$\('#toolPanel'\)\.append\(settings\)/);
  assert.match(webgl,/mode\.value='webgl'/);
  assert.doesNotMatch(webgl,/fallback\('従来表示'\)/);
 });
