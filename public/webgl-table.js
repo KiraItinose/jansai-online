@@ -27,7 +27,7 @@ const endBox=document.createElement('div');endBox.id='sceneEnd';endBox.innerHTML
 const help=$('#rightPane .rules');const history=$('#jrOpenHistory'),exit=$('#returnSetup');const actions=document.createElement('div');actions.className='separate-actions';actions.append(history,exit);$('#rightPane').append(actions);
 let sunlight,centerGroup;
 let scene,camera,renderer,root,enabled=false,failed=false,initialized=false,loading=false,dirty=true,raf=0,previousTime=0,azimuth=0,hoverKey=null,pressed=null,orbit=null,centerTexture,centerCanvas,centerSig='',doraSig='',w=0,h=0;
-const records=new Map(),faceMats=new Map(),faceURLs=new Map(),seatCards=[],animations=new Set();let meshes={},mats={},backMat,raycaster,pointer;const resources=[];
+const records=new Map(),faceMats=new Map(),riverFaceMats=new Map(),faceURLs=new Map(),seatCards=[],animations=new Set();let meshes={},mats={},backMat,raycaster,pointer;const resources=[];
 const viewPreset={table:[54,38],low:[32,38],overhead:[66,38]};
 function mobileTableZoom(){
  try{
@@ -44,6 +44,21 @@ function mobileHandMetrics(viewWidth,count,pixelsPerUnit){
  const pitch=Math.max(27,Math.min(55,usable/Math.max(13,count)/Math.max(.55,pixelsPerUnit)));
  const scale=Math.max(1.55,Math.min(2.35,pitch/22.5));
  return {pitch,scale};
+}
+// Fit the foreground hand inside the felt, reserving room for opened melds.
+// Seat 3's exposed tiles are particularly close to the left of our hand.
+function mobileHandCorridor(count,preferredPitch,ownMeldLeft,hasOwnMeld,leftMeld,rightMeld){
+ // Preserve the already-approved large hand when nobody has called a meld.
+ if(!hasOwnMeld&&!leftMeld&&!rightMeld){
+  return {pitch:preferredPitch,scale:Math.max(1.55,Math.min(2.35,preferredPitch/22.5)),start:-(count*preferredPitch+9)/2+12,left:-1000,right:1000};
+ }
+ const left=leftMeld?-230:-270;
+ const right=Math.min(hasOwnMeld?ownMeldLeft-25:270,rightMeld?250:270);
+ const width=Math.max(60,right-left);
+ const pitch=Math.max(17,Math.min(preferredPitch,(width-10)/Math.max(1,count)));
+ const scale=Math.max(1.05,Math.min(2.3,pitch/22.2));
+ const occupied=count*pitch+9;
+ return {pitch,scale,start:left+Math.max(0,(width-occupied)/2),left,right};
 }
 const qualityModes={high:{dpr:1.5,shadow:2048},standard:{dpr:1.25,shadow:1024},light:{dpr:1,shadow:0}};
 function applyQuality(){
@@ -110,6 +125,18 @@ function buildTileMaterials(){mats.ivory=new THREE.MeshPhysicalMaterial({color:0
  meshes.ivory=solid(21,28,13,1.8,1.6);meshes.red=solid(21,28,3.5,1.8,1.1);meshes.face=new THREE.PlaneGeometry(18.5,25);meshes.back=new THREE.PlaneGeometry(17.8,24.4);meshes.halo=new THREE.PlaneGeometry(23.5,30.5);
 }
 function asset(node){return [...node.classList].find(x=>x.startsWith('tile-')&&faceMats.has(x.slice(5)))?.slice(5)||'ji6';}
+// A slightly brighter material for the small, flat discard faces on phone screens.
+// Reuse one instance per tile kind; player hands and PC materials are untouched.
+function mobileRiverFace(name){
+ let material=riverFaceMats.get(name);
+ if(!material){
+  const base=faceMats.get(name);if(!base)return base;
+  material=base.clone();material.roughness=.34;
+  material.emissive.setHex(0x222222);material.emissiveIntensity=.18;
+  riverFaceMats.set(name,material);
+ }
+ return material;
+}
 function tile(key,node,hidden){let rec=records.get(key);if(rec)return rec;const group=new THREE.Group();root.add(group);const ivory=mesh(meshes.ivory,mats.ivory,group);ivory.position.z=1.75;const red=mesh(meshes.red,mats.red,group);red.position.z=-6.5;
  const back=mesh(meshes.back,backMat,group);back.rotation.y=Math.PI;back.position.z=-8.28;back.castShadow=false;
  const face=hidden?null:mesh(meshes.face,faceMats.get(asset(node)),group);if(face){face.position.z=8.28;face.castShadow=false;}
@@ -124,7 +151,11 @@ function place(key,node,x,y,z,seat=0,flat=false,hidden=false,scale=1,animate=tru
  if(rec.own){rot.copy(camera.quaternion);const mat=new THREE.Matrix4().makeRotationFromQuaternion(rot),e=mat.elements;const support=Math.abs(e[1])*10.5+Math.abs(e[5])*14+Math.abs(e[9])*8.25;pos.set(x*Math.cos(azimuth),support*scale+.5+(selected?7:hovered?2.5:0),z-x*Math.sin(azimuth));}
  rec.group.scale.setScalar(scale);rec.dim.visible=rec.own&&node.classList.contains('no');rec.halo.visible=selected||hovered||node?.classList.contains('last-discard');
  if(hidden&&flat)rot.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.PI));
- if(rec.face&&node)rec.face.material=faceMats.get(asset(node));
+ if(rec.face&&node){
+  const name=asset(node),river=node.closest('.rv');
+  const mobileRiver=river&&matchMedia('(max-width:1000px) and (orientation:landscape)').matches;
+  rec.face.material=mobileRiver?mobileRiverFace(name):faceMats.get(name);
+ }
  if(fresh){rec.group.position.copy(pos);rec.group.quaternion.copy(rot);if(animate&&key.startsWith('id:')&&node?.closest('.rv')&&sceneHasTiles){rec.group.position.copy(world(0,18,201,seat));rec.group.quaternion.copy(orient(seat,false));}}
  if(rec.target.distanceTo(pos)>.01||rec.rotation.angleTo(rot)>.001||fresh){rec.start={position:rec.group.position.clone(),rotation:rec.group.quaternion.clone(),time:performance.now(),duration:animate&&!matchReset?340:0};rec.target.copy(pos);rec.rotation.copy(rot);if(rec.start.duration)animations.add(rec);else{rec.group.position.copy(pos);rec.group.quaternion.copy(rot)}}
  rec.used=true;return rec;}
@@ -143,14 +174,26 @@ function syncTiles(){for(const r of records.values())r.used=false;
  const tileCount=hands.length+Math.max(1,draws.length);
  const unitPixels=landscapePhone?Math.abs(project(new THREE.Vector3(50,14,240)).x-project(new THREE.Vector3(0,14,240)).x)/50:1;
  const handMetrics=landscapePhone?mobileHandMetrics(w,tileCount,unitPixels):null;
- const ownPitch=handMetrics?.pitch??(phone?32:25),ownScale=handMetrics?.scale??(phone?1.45:1.14);
- const handWidth=tileCount*ownPitch+9;let x=Math.min(-handWidth/2+12,groups.length?meldLeft-(phone?110:95)-handWidth+12:Infinity);
- const handZ=240-Math.abs(Math.sin(azimuth))*Math.max(Math.abs(x),Math.abs(x+handWidth-ownPitch));
+ const handCorridor=landscapePhone?mobileHandCorridor(tileCount,handMetrics.pitch,meldLeft,groups.length>0,meldGroups(3).length>0,meldGroups(1).length>0):null;
+ const ownPitch=handCorridor?.pitch??(phone?32:25),ownScale=handCorridor?.scale??(phone?1.45:1.14);
+ const handWidth=tileCount*ownPitch+9;
+ let x=handCorridor?handCorridor.start:Math.min(-handWidth/2+12,groups.length?meldLeft-(phone?110:95)-handWidth+12:Infinity);
+ const handZ=(landscapePhone?260:240)-Math.abs(Math.sin(azimuth))*Math.max(Math.abs(x),Math.abs(x+handWidth-ownPitch));
  const signature=hands.map(n=>n.dataset.id).join(',');matchReset=sceneHasTiles&&signature!==lastHandSignature&&![...records.values()].some(r=>r.own&&hands.some(n=>n.dataset.id===r.node?.dataset.id));lastHandSignature=signature;
  for(const n of hands){place('id:'+n.dataset.id,n,x,14.7,handZ,0,false,false,ownScale);x+=ownPitch;}x+=9;for(const n of draws){place('id:'+n.dataset.id,n,x,14.7,handZ,0,false,false,ownScale);x+=ownPitch;}
  if(!draws.length)x+=ownPitch;handTimerAnchor=new THREE.Vector3((x+7)*Math.cos(azimuth),14.7*ownScale,handZ-(x+7)*Math.sin(azimuth));
  for(let seat=1;seat<4;seat++){const backs=[...$('#wallTiles'+seat).querySelectorAll('.back-tile')];for(let i=0;i<backs.length;i++){const n=backs[i],offset=(i-(backs.length-1)/2)*22+(n.classList.contains('opponent-drawn')?7:0);place('back:'+seat+':'+i,n,offset,14.5,seat%2?251.5:220,seat,false,true,1,false)}syncMelds(seat);}
- for(let seat=0;seat<4;seat++){const river=[...$('#r'+seat).querySelectorAll('.t')],scale=.86;for(let i=0;i<river.length;i++){const n=river[i],row=Math.min(3,Math.floor(i/6)),col=i<24?i%6:i-18,pitch=river.length>24&&row===3?Math.min(23*scale,140/(river.length-18)):23*scale;place('id:'+n.dataset.id,n,(col-2.5)*pitch,8.25*scale+.4,103+row*29*scale,seat,true,false,scale)}}
+ for(let seat=0;seat<4;seat++){
+  const river=[...$('#r'+seat).querySelectorAll('.t')];
+  const scale=landscapePhone?1.10:.86;
+  const base=landscapePhone?96:103;
+  const rowStep=landscapePhone?29.5:29;
+  for(let i=0;i<river.length;i++){
+   const n=river[i],row=Math.min(3,Math.floor(i/6)),col=i<24?i%6:i-18;
+   const pitch=river.length>24&&row===3?Math.min(23*scale,140/(river.length-18)):23*scale;
+   place('id:'+n.dataset.id,n,(col-2.5)*pitch,8.25*scale+.4,base+row*rowStep*scale,seat,true,false,scale);
+  }
+ }
  const top=$('#top .t');if(top)place('top',top,23,19,-8,0,true,false,.9,false);
  for(const [key,r] of records)if(!r.used){root.remove(r.group);r.button?.remove();animations.delete(r);records.delete(key)}sceneHasTiles=true;matchReset=false;syncHUD();updateCenter();syncRiichi();}
 function updateCenter(){
@@ -181,7 +224,7 @@ function resize(){w=host.clientWidth;h=host.clientHeight;if(!w||!h)return;render
  const corners=[[-324,-31,-305],[324,-31,-305],[-324,-31,305],[324,-31,305],[-324,3,-305],[324,3,-305],[-324,3,305],[324,3,305]];
  let ps=corners.map(v=>project(new THREE.Vector3(...v)));let minX=Math.min(...ps.map(p=>p.x)),maxX=Math.max(...ps.map(p=>p.x)),minY=Math.min(...ps.map(p=>p.y)),maxY=Math.max(...ps.map(p=>p.y));camera.zoom=Math.min((w-22)/(maxX-minX),(h-(compact?10:58))/(maxY-minY))*(mobileLandscape?mobileTableZoom():1);camera.updateProjectionMatrix();ps=corners.map(v=>project(new THREE.Vector3(...v)));const cx=(Math.min(...ps.map(p=>p.x))+Math.max(...ps.map(p=>p.x)))/2,cy=(Math.min(...ps.map(p=>p.y))+Math.max(...ps.map(p=>p.y)))/2;
  camera.projectionMatrix.elements[8]+=(cx-w/2)*2/w;camera.projectionMatrix.elements[9]+=((h-(compact?0:32))/2-cy)*2/h;
- if(mobileLandscape){const handAnchor=project(new THREE.Vector3(0,15,240));camera.projectionMatrix.elements[9]+=((h-48)-handAnchor.y)*2/h;}
+ if(mobileLandscape){const handAnchor=project(new THREE.Vector3(0,15,260));camera.projectionMatrix.elements[9]+=((h-48)-handAnchor.y)*2/h;}
  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 }
 
