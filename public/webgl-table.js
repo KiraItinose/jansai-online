@@ -281,7 +281,7 @@ function frame(t){raf=0;if(!enabled||document.hidden)return;try{
  // Jansai3DReady must resolve without touching uninitialized game UI.
  if(!firstFrameReady){scene.updateMatrixWorld(true);renderer.render(scene,camera);ready3D();return;}
  // Phase 2: keep the loading cover until the match has populated its tiles.
- if(!sceneHasTiles&&!document.querySelector('#hand .t,#tsumoSlot .t,#wallTiles1 .back-tile')){
+ if(!sceneHasTiles&&!document.querySelector('#hand .t,#tsumoSlot .t')){
   if(!hydrationTimer)hydrationTimer=setTimeout(()=>{hydrationTimer=0;invalidate()},120);
   return;
  }
