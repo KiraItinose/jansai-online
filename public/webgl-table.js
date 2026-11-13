@@ -27,7 +27,8 @@ const endBox=document.createElement('div');endBox.id='sceneEnd';endBox.innerHTML
 const help=$('#rightPane .rules');const history=$('#jrOpenHistory'),exit=$('#returnSetup');const actions=document.createElement('div');actions.className='separate-actions';actions.append(history,exit);$('#rightPane').append(actions);
 let sunlight,centerGroup;
 let scene,camera,renderer,root,enabled=false,failed=false,initialized=false,loading=false,dirty=true,raf=0,previousTime=0,azimuth=0,hoverKey=null,pressed=null,orbit=null,centerTexture,centerCanvas,centerSig='',doraSig='',w=0,h=0;
-const records=new Map(),faceMats=new Map(),riverFaceMats=new Map(),faceURLs=new Map(),seatCards=[],animations=new Set();let meshes={},mats={},backMat,raycaster,pointer;const resources=[];
+const records=new Map(),faceMats=new Map(),riverFaceMats=new Map(),faceURLs=new Map(),seatCards=[],animations=new Set();
+let mobileHandOverlay=null;let meshes={},mats={},backMat,raycaster,pointer;const resources=[];
 const viewPreset={table:[54,38],low:[32,38],overhead:[66,38]};
 function mobileTableZoom(){
  try{
@@ -47,18 +48,27 @@ function mobileHandMetrics(viewWidth,count,pixelsPerUnit){
 }
 // Fit the foreground hand inside the felt, reserving room for opened melds.
 // Seat 3's exposed tiles are particularly close to the left of our hand.
-function mobileHandCorridor(count,preferredPitch,ownMeldLeft,hasOwnMeld,leftMeld,rightMeld){
- // Preserve the already-approved large hand when nobody has called a meld.
- if(!hasOwnMeld&&!leftMeld&&!rightMeld){
-  return {pitch:preferredPitch,scale:Math.max(1.55,Math.min(2.35,preferredPitch/22.5)),start:-(count*preferredPitch+9)/2+12,left:-1000,right:1000};
- }
- const left=leftMeld?-230:-270;
- const right=Math.min(hasOwnMeld?ownMeldLeft-25:270,rightMeld?250:270);
- const width=Math.max(60,right-left);
- const pitch=Math.max(17,Math.min(preferredPitch,(width-10)/Math.max(1,count)));
- const scale=Math.max(1.05,Math.min(2.3,pitch/22.2));
- const occupied=count*pitch+9;
- return {pitch,scale,start:left+Math.max(0,(width-occupied)/2),left,right};
+function mobileReferenceComposition(width,height,tableZoom){
+ // The attached mobile reference fills the screen with felt, while the hand remains a separate foreground row.
+ const safeZoom=Number.isFinite(tableZoom)?Math.max(.94,Math.min(1.25,tableZoom)):1.12;
+ return {pitch:45,nearWidthRatio:.82*safeZoom,centerYRatio:.43,handWidthRatio:.62,handHeightRatio:.142};
+}
+function mobileForegroundHand(viewWidth,viewHeight,handCount,drawCount){
+ const composition=mobileReferenceComposition(viewWidth,viewHeight,1.12);
+ const visible=Math.max(1,handCount+drawCount),drawGap=drawCount?Math.min(14,viewHeight*.017):0;
+ const tileWidth=Math.min(viewHeight*composition.handHeightRatio*21/28,(viewWidth*composition.handWidthRatio-drawGap)/visible);
+ const tileHeight=tileWidth*28/21;
+ const total=visible*tileWidth+drawGap;
+ return {start:(viewWidth-total)/2,tileWidth,tileHeight,drawGap,handCount,drawCount,index:0,planeDistance:650};
+}
+function mobileOverlayWorld(screenX,screenY,distance){
+ const focal=h*camera.zoom/(2*Math.tan(camera.fov*Math.PI/360));
+ const forward=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+ const right=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+ const up=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);
+ const world=camera.position.clone().addScaledVector(forward,distance);
+ return world.addScaledVector(right,(screenX-w/2)*distance/focal)
+   .addScaledVector(up,(h/2-screenY)*distance/focal);
 }
 const qualityModes={high:{dpr:1.5,shadow:2048},standard:{dpr:1.25,shadow:1024},light:{dpr:1,shadow:0}};
 function applyQuality(){
@@ -148,7 +158,24 @@ function world(x,y,z,seat=0){const a=seat*Math.PI/2;return new THREE.Vector3(x*M
 function orient(seat,flat,side=false){const q=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),seat*Math.PI/2);q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),flat?-Math.PI/2:(seat===0?-.32:0)));if(side)q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),-Math.PI/2));return q;}
 function place(key,node,x,y,z,seat=0,flat=false,hidden=false,scale=1,animate=true){const fresh=!records.has(key),rec=tile(key,node,hidden);rec.node=node;rec.own=!!node?.closest('#hand,#tsumoSlot');rec.legal=rec.own&&node.classList.contains('ok');const selected=rec.own&&node.classList.contains('selected');const hovered=rec.key===hoverKey&&rec.legal;
  const pos=world(x,y+(selected?7:hovered?2.5:0),z,seat),rot=orient(seat,flat,node?.classList.contains('riichi-tile')||node?.classList.contains('called')||node?.classList.contains('stacked'));
- if(rec.own){rot.copy(camera.quaternion);const mat=new THREE.Matrix4().makeRotationFromQuaternion(rot),e=mat.elements;const support=Math.abs(e[1])*10.5+Math.abs(e[5])*14+Math.abs(e[9])*8.25;pos.set(x*Math.cos(azimuth),support*scale+.5+(selected?7:hovered?2.5:0),z-x*Math.sin(azimuth));}
+ if(rec.own){
+  rot.copy(camera.quaternion);
+  if(mobileHandOverlay){
+   // Place our hand in front of the camera as a 3D HUD. All existing raycasts and legal clicks still target these meshes.
+   const layout=mobileHandOverlay,index=layout.index++;
+   const gap=index>=layout.handCount?layout.drawGap:0;
+   const px=layout.start+(index+.5)*layout.tileWidth+gap;
+   const lift=selected?Math.min(18,layout.tileHeight*.2):hovered?Math.min(6,layout.tileHeight*.07):0;
+   const py=h-Math.max(3,h*.009)-layout.tileHeight/2-lift;
+   const focal=h*camera.zoom/(2*Math.tan(camera.fov*Math.PI/360));
+   scale=layout.tileHeight*layout.planeDistance/(28*focal);
+   pos.copy(mobileOverlayWorld(px,py,layout.planeDistance));
+  }else{
+   const mat=new THREE.Matrix4().makeRotationFromQuaternion(rot),e=mat.elements;
+   const support=Math.abs(e[1])*10.5+Math.abs(e[5])*14+Math.abs(e[9])*8.25;
+   pos.set(x*Math.cos(azimuth),support*scale+.5+(selected?7:hovered?2.5:0),z-x*Math.sin(azimuth));
+  }
+ }
  rec.group.scale.setScalar(scale);rec.dim.visible=rec.own&&node.classList.contains('no');rec.halo.visible=selected||hovered||node?.classList.contains('last-discard');
  if(hidden&&flat)rot.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.PI));
  if(rec.face&&node){
@@ -171,14 +198,12 @@ function syncMelds(seat){const scale=.86,edge=seat%2?264:283,z=seat%2?270:251;le
 function syncTiles(){for(const r of records.values())r.used=false;
  const phone=matchMedia('(max-width:1000px)').matches,landscapePhone=phone&&matchMedia('(orientation:landscape)').matches;
  const hands=[...$('#hand').querySelectorAll('.t')],draws=[...$('#tsumoSlot').querySelectorAll('.t')],groups=meldGroups(0),meldLeft=syncMelds(0);
- const tileCount=hands.length+Math.max(1,draws.length);
- const unitPixels=landscapePhone?Math.abs(project(new THREE.Vector3(50,14,240)).x-project(new THREE.Vector3(0,14,240)).x)/50:1;
- const handMetrics=landscapePhone?mobileHandMetrics(w,tileCount,unitPixels):null;
- const handCorridor=landscapePhone?mobileHandCorridor(tileCount,handMetrics.pitch,meldLeft,groups.length>0,meldGroups(3).length>0,meldGroups(1).length>0):null;
- const ownPitch=handCorridor?.pitch??(phone?32:25),ownScale=handCorridor?.scale??(phone?1.45:1.14);
+ // When the reference camera fills the felt, the front hand lives in a camera-facing row instead.
+ mobileHandOverlay=landscapePhone?mobileForegroundHand(w,h,hands.length,draws.length):null;
+ const tileCount=hands.length+Math.max(1,draws.length),ownPitch=phone?32:25,ownScale=phone?1.45:1.14;
  const handWidth=tileCount*ownPitch+9;
- let x=handCorridor?handCorridor.start:Math.min(-handWidth/2+12,groups.length?meldLeft-(phone?110:95)-handWidth+12:Infinity);
- const handZ=(landscapePhone?260:240)-Math.abs(Math.sin(azimuth))*Math.max(Math.abs(x),Math.abs(x+handWidth-ownPitch));
+ let x=Math.min(-handWidth/2+12,groups.length?meldLeft-(phone?110:95)-handWidth+12:Infinity);
+ const handZ=240-Math.abs(Math.sin(azimuth))*Math.max(Math.abs(x),Math.abs(x+handWidth-ownPitch));
  const signature=hands.map(n=>n.dataset.id).join(',');matchReset=sceneHasTiles&&signature!==lastHandSignature&&![...records.values()].some(r=>r.own&&hands.some(n=>n.dataset.id===r.node?.dataset.id));lastHandSignature=signature;
  for(const n of hands){place('id:'+n.dataset.id,n,x,14.7,handZ,0,false,false,ownScale);x+=ownPitch;}x+=9;for(const n of draws){place('id:'+n.dataset.id,n,x,14.7,handZ,0,false,false,ownScale);x+=ownPitch;}
  if(!draws.length)x+=ownPitch;handTimerAnchor=new THREE.Vector3((x+7)*Math.cos(azimuth),14.7*ownScale,handZ-(x+7)*Math.sin(azimuth));
@@ -220,11 +245,39 @@ function layoutHUD(){const compact=matchMedia('(max-width:1000px)').matches;cons
 const anchors=[[-150,22,182],[182,24,135],[130,24,-165],[-180,24,-120]];seatCards.forEach((el,k)=>{const p=project(new THREE.Vector3(...anchors[k]));if(compact){const chips=[[85,h-48],[w-72,h*.5],[w-75,42],[75,h*.42]];p.x=chips[k][0];p.y=chips[k][1]}el.style.left=Math.max(80,Math.min(w-80,p.x))+'px';el.style.top=Math.max(compact?25:90,Math.min(h-(compact?25:85),p.y))+'px'});const wait=$('#sceneWait'),sourceWait=$('#wait');if(wait.innerHTML!==sourceWait.innerHTML)wait.innerHTML=sourceWait.innerHTML;wait.hidden=!sourceWait.innerHTML.trim();wait.style.left=Math.max(wait.offsetWidth/2+8,Math.min(w-wait.offsetWidth/2-8,parseFloat(seatCards[0].style.left)))+'px';wait.style.top=(parseFloat(seatCards[0].style.top)-seatCards[0].offsetHeight/2-8)+'px';const topLeft=project(new THREE.Vector3(-324,3,-305)),dora=$('#sceneDora');dora.style.left=(compact?8:Math.max(8,topLeft.x-dora.offsetWidth-10))+'px';const doraRect=dora.getBoundingClientRect();const endBox=$('#sceneEnd');endBox.style.left=doraRect.left+'px';endBox.style.top=(doraRect.bottom+9)+'px';// Tool dock is positioned by CSS or the user drag preference; the 3D HUD must not overwrite it.
 const timer=$('#sceneTimer');timer.hidden=!handTimerAnchor||!timer.textContent.trim();if(handTimerAnchor){const q=project(handTimerAnchor);timer.style.left=q.x+'px';timer.style.top=(q.y-18)+'px';}
 for(const r of records.values())if(r.own){if(!r.button){r.button=document.createElement('button');r.button.className='scene-key';r.button.addEventListener('click',()=>activateTile(r));keys.append(r.button)}r.button.disabled=!r.legal;r.button.setAttribute('aria-label',r.node.title+(r.node.classList.contains('selected')?' 選択中、もう一度で打牌':''));r.button.dataset.tileId=r.node.dataset.id;const p=project(r.group.position),a=project(r.group.localToWorld(new THREE.Vector3(-10.5,-14,8.3))),b=project(r.group.localToWorld(new THREE.Vector3(10.5,14,8.3)));r.button.style.cssText=`left:${Math.min(a.x,b.x)}px;top:${Math.min(a.y,b.y)}px;width:${Math.abs(b.x-a.x)}px;height:${Math.abs(b.y-a.y)}px;`;}}
-function resize(){w=host.clientWidth;h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=viewPreset[preset.value][1];camera.zoom=1;const compact=matchMedia('(max-width:1000px)').matches;const mobileLandscape=compact&&matchMedia('(orientation:landscape)').matches;if(centerGroup)centerGroup.scale.set(mobileLandscape?.81:1,1,mobileLandscape?.81:1);const angle=(compact&&preset.value==='table'?(mobileLandscape?52:40):viewPreset[preset.value][0])*Math.PI/180,distance=1100;camera.position.set(Math.sin(azimuth)*Math.cos(angle)*distance,Math.sin(angle)*distance,Math.cos(azimuth)*Math.cos(angle)*distance+25);camera.lookAt(0,0,25);camera.updateProjectionMatrix();camera.updateMatrixWorld();
- const corners=[[-324,-31,-305],[324,-31,-305],[-324,-31,305],[324,-31,305],[-324,3,-305],[324,3,-305],[-324,3,305],[324,3,305]];
- let ps=corners.map(v=>project(new THREE.Vector3(...v)));let minX=Math.min(...ps.map(p=>p.x)),maxX=Math.max(...ps.map(p=>p.x)),minY=Math.min(...ps.map(p=>p.y)),maxY=Math.max(...ps.map(p=>p.y));camera.zoom=Math.min((w-22)/(maxX-minX),(h-(compact?10:58))/(maxY-minY))*(mobileLandscape?mobileTableZoom():1);camera.updateProjectionMatrix();ps=corners.map(v=>project(new THREE.Vector3(...v)));const cx=(Math.min(...ps.map(p=>p.x))+Math.max(...ps.map(p=>p.x)))/2,cy=(Math.min(...ps.map(p=>p.y))+Math.max(...ps.map(p=>p.y)))/2;
- camera.projectionMatrix.elements[8]+=(cx-w/2)*2/w;camera.projectionMatrix.elements[9]+=((h-(compact?0:32))/2-cy)*2/h;
- if(mobileLandscape){const handAnchor=project(new THREE.Vector3(0,15,260));camera.projectionMatrix.elements[9]+=((h-48)-handAnchor.y)*2/h;}
+function resize(){
+ w=host.clientWidth;h=host.clientHeight;if(!w||!h)return;
+ renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=viewPreset[preset.value][1];camera.zoom=1;
+ const compact=matchMedia('(max-width:1000px)').matches;
+ const mobileReference=compact&&matchMedia('(orientation:landscape)').matches&&preset.value==='table';
+ if(centerGroup)centerGroup.scale.set(mobileReference?.81:1,1,mobileReference?.81:1);
+ const composition=mobileReference?mobileReferenceComposition(w,h,mobileTableZoom()):null;
+ const angle=(composition?composition.pitch:(compact&&preset.value==='table'?40:viewPreset[preset.value][0]))*Math.PI/180;
+ const distance=1100;
+ camera.position.set(Math.sin(azimuth)*Math.cos(angle)*distance,Math.sin(angle)*distance,Math.cos(azimuth)*Math.cos(angle)*distance+25);
+ camera.lookAt(0,0,25);camera.updateProjectionMatrix();camera.updateMatrixWorld();
+ if(mobileReference){
+   // Match reference: near edge almost fills screen, far edge is allowed to crop behind the HUD.
+   const left=project(new THREE.Vector3(-324,3,305));
+   const right=project(new THREE.Vector3(324,3,305));
+   const nearSpan=Math.max(1,Math.abs(right.x-left.x));
+   camera.zoom=Math.max(.8,Math.min(3.25,w*composition.nearWidthRatio/nearSpan));
+   camera.updateProjectionMatrix();
+   const center=project(new THREE.Vector3(0,10,0));
+   camera.projectionMatrix.elements[8]+=(center.x-w/2)*2/w;
+   camera.projectionMatrix.elements[9]+=(h*composition.centerYRatio-center.y)*2/h;
+ }else{
+   const corners=[[-324,-31,-305],[324,-31,-305],[-324,-31,305],[324,-31,305],[-324,3,-305],[324,3,-305],[-324,3,305],[324,3,305]];
+   const ps=corners.map(v=>project(new THREE.Vector3(...v)));
+   const minX=Math.min(...ps.map(p=>p.x)),maxX=Math.max(...ps.map(p=>p.x)),minY=Math.min(...ps.map(p=>p.y)),maxY=Math.max(...ps.map(p=>p.y));
+   camera.zoom=Math.min((w-22)/(maxX-minX),(h-(compact?10:58))/(maxY-minY));
+   camera.updateProjectionMatrix();
+   const after=corners.map(v=>project(new THREE.Vector3(...v)));
+   const cx=(Math.min(...after.map(p=>p.x))+Math.max(...after.map(p=>p.x)))/2;
+   const cy=(Math.min(...after.map(p=>p.y))+Math.max(...after.map(p=>p.y)))/2;
+   camera.projectionMatrix.elements[8]+=(cx-w/2)*2/w;
+   camera.projectionMatrix.elements[9]+=((h-(compact?0:32))/2-cy)*2/h;
+ }
  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
 }
 

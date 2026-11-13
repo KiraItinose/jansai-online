@@ -2,27 +2,23 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
-const file=n=>readFileSync(new URL('../public/'+n,import.meta.url),'utf8');
-test('mobile camera is scoped; foreground hand uses adaptive spacing',()=>{
+const file=name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8');
+test('reference mobile camera is independent of desktop camera and retains raycast',()=>{
  const s=file('webgl-table.js');
- assert.match(s,/mobileLandscape\?mobileTableZoom\(\):1/);
- assert.match(s,/const handMetrics=landscapePhone\?mobileHandMetrics/);
- assert.match(s,/const ownPitch=handMetrics\?\.pitch/);
- assert.match(s,/handAnchor=project\(new THREE\.Vector3\(0,15,240\)\)/);
- assert.match(s,/card\.dataset\.seat=String\(k\)/);
+ assert.match(s,/const mobileReference=compact&&matchMedia/);
+ assert.match(s,/if\(mobileReference\)\{/);
+ assert.match(s,/const corners=\[\[-324,-31,-305\]/);
+ assert.match(s,/pos\.copy\(mobileOverlayWorld/);
+ assert.match(s,/raycaster\.intersectObjects\(candidates,true\)/);
 });
-test('screen-adaptive hand pitch increases readability without overflow',()=>{
+test('reference hand is fixed in a camera-facing bottom row',()=>{
  const s=file('webgl-table.js');
- const m=s.match(/function mobileHandMetrics\([^)]*\)\{[\s\S]*?\n\}/);assert.ok(m);
- const layout=vm.runInNewContext(m[0]+'\nmobileHandMetrics',{Math});
- for(const [w,ppu] of [[650,.75],[800,.8],[920,1.1]]){
-  const r=layout(w,14,ppu);
-  assert.ok(r.pitch>=27&&r.pitch<=55);
-  assert.ok(r.scale>=1.55&&r.scale<=2.35);
-  assert.ok(r.pitch*14*ppu<=w*.81);
- }
+ assert.match(s,/const px=layout\.start\+\(index\+\.5\)\*layout\.tileWidth\+gap/);
+ assert.match(s,/const py=h-Math\.max\(3,h\*\.009\)-layout\.tileHeight\/2-lift/);
+ assert.match(s,/rot\.copy\(camera\.quaternion\)/);
+ assert.match(s,/mobileHandOverlay=landscapePhone\?mobileForegroundHand/);
 });
-test('board magnification is bounded with compatibility for saved zoom',()=>{
+test('mobile zoom settings keep backwards-compatible values',()=>{
  const s=file('webgl-table.js'),m=s.match(/function mobileTableZoom\(\)\{[\s\S]*?\n\}/);assert.ok(m);
  const localStorage={getItem:()=>null};
  const fn=vm.runInNewContext(m[0]+'\nmobileTableZoom',{localStorage});

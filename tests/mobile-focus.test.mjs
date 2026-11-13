@@ -15,6 +15,6 @@ test('mobile composition is isolated and cleans up conflicting old rules',()=>{
 });
 test('real-match chinchiro remains unchanged and cached assets are versioned',()=>{
  const sw=file('sw.js'),motion=file('chinchiro-motion.js');
- assert.match(sw,/cloudflare-ws15-river-meld/);
+ assert.match(sw,/cloudflare-ws16-reference-frame/);
  assert.match(motion,/window\.ChinMotion=\{duration:DURATION,play\}/);
 });

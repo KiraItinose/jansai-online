@@ -280,3 +280,63 @@
  body.page-play.scene-live #sceneHUD .scene-seat strong{font-size:9px!important}
  body.page-play.scene-live #sceneHUD .scene-seat .scene-score{font-size:10px!important}
 }
+
+/* v6 mobile reference composition: 1640x720 reference framing.
+   The 3D board and hand coordinates are controlled in webgl-table.js; only HUD anchors live here. */
+@media (max-width:1000px) and (orientation:landscape) {
+  body.page-play.scene-live #sceneHost{
+    position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+    top:0!important;right:0!important;bottom:0!important;left:0!important;
+  }
+  /* Seat positioning based on reference frame, not on older camera-relative chips. */
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="0"]{
+    left:29%!important;top:75%!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="1"]{
+    left:93%!important;top:36%!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="2"]{
+    left:69%!important;top:12%!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="3"]{
+    left:7%!important;top:35%!important;
+  }
+  /* The reference has portraits rather than large opaque score rectangles. */
+  body.page-play.scene-live #sceneHUD .scene-seat>div{
+    background:#08131cb8!important;border:0!important;box-shadow:none!important;
+    padding:2px 4px!important;width:76px!important;max-width:76px!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-avatar{
+    width:44px!important;height:44px!important;flex:0 0 44px!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat strong{
+    font-size:10px!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-score{
+    font-size:10px!important;
+  }
+  /* No other floating UI may cover the enlarged, directly tappable bottom hand. */
+  body.page-play.scene-live #sceneTimer{
+    right:max(8px,env(safe-area-inset-right))!important;
+    bottom:15%!important;top:auto!important;
+    left:auto!important;
+  }
+  body.page-play.scene-live #actionArea:not(.end-actions){
+    bottom:max(104px,calc(env(safe-area-inset-bottom) + 104px))!important;
+    max-width:55vw!important;
+    right:max(8px,env(safe-area-inset-right))!important;
+  }
+  body.page-play.scene-live #sceneWait{
+    left:50%!important;bottom:22%!important;top:auto!important;
+    max-width:50vw!important;
+  }
+}
+@media (max-width:700px) and (orientation:landscape) {
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="0"]{left:28%!important;top:70%!important}
+  body.page-play.scene-live #sceneHUD .scene-seat[data-seat="2"]{left:68%!important;top:12%!important}
+  body.page-play.scene-live #sceneHUD .scene-seat .scene-avatar{
+    width:35px!important;height:35px!important;flex:0 0 35px!important;
+  }
+  body.page-play.scene-live #sceneHUD .scene-seat>div{width:65px!important;max-width:65px!important}
+  body.page-play.scene-live #actionArea:not(.end-actions){bottom:75px!important}
+}
