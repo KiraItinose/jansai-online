@@ -1,6 +1,6 @@
 'use strict';
 const PREFIX='jansuno:'+self.registration.scope+':';
-const CACHE=PREFIX+'0.5.7-cloudflare-ws17-3d-start-results';
+const CACHE=PREFIX+'0.5.7-cloudflare-ws18-3d-hydration';
 const FILES=['./','index.html','jansuno-room-v0.5.7.html','jansuno-play-v0.5.7.html','webgl-table.js','webgl-table.css','sample-atlas.js','vendor/three.min.js','mobile.css','lobby.css','refinements.css','online.html','online.js','online.css','branding/jansai-logo.png','portraits/gold.png','portraits/rose.png','portraits/silver.png','portraits/violet.png','chinchiro-motion.js','app-shell.js','jansai-ui-next.js','jansai-ui-next.css','jansai-mobile-v5.css','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/apple-touch-icon.png'];
 const URLS=FILES.map(p=>new URL(p,self.registration.scope).href);
 // Precache first, then activate the new fetch strategy without reloading a running match.
