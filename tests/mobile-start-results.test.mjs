@@ -11,7 +11,7 @@ test('the game must not start until 3D is actually rendered',()=>{
  assert.ok(html.indexOf('await window.Jansai3DReady;')<html.indexOf('engine.startMatch('));
  assert.match(html,/body\.page-play:not\(\.scene-ready\) #tb/);
  assert.match(scene,/if\(!firstFrameReady\)\{scene\.updateMatrixWorld\(true\);renderer\.render\(scene,camera\);ready3D\(\);return;\}/);
- assert.match(scene,/if\(!sceneHasTiles&&!document\.querySelector/);
+ assert.match(scene,/if\(!sceneHasTiles&&!document\.querySelector\('#hand \.t,#tsumoSlot \.t'\)\)/);
  assert.match(scene,/if\(!document\.body\.classList\.contains\('scene-ready'\)\)/);
  assert.match(scene,/document\.body\.classList\.add\('scene-ready'\)/);
  assert.match(scene,/window\.__jansaiResolve3D\?\.\(\)/);
