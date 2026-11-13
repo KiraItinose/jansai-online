@@ -521,3 +521,75 @@
  body.page-play.scene-live #displayDock{display:none!important}
  body.page-play.scene-live #mobileGameDrawer #toolDock{display:none!important}
 }
+
+/* v8: Match result screens show all details at once. History keeps its original scrolling. */
+@media(max-width:1000px){
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-card{
+  height:auto!important;min-height:0!important;max-height:none!important;flex:0 0 auto!important;
+  overflow:hidden!important;transform:scale(var(--jr-fit-scale,1))!important;transform-origin:center center!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-content{
+  height:auto!important;min-height:0!important;flex:0 0 auto!important;overflow:visible!important;overscroll-behavior:auto!important;
+  padding:5px 9px!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-header{padding:4px 9px 3px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-footer{padding:5px 9px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-tiles{overflow:visible!important;flex-wrap:nowrap!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-agari-data{gap:4px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-agari-layout{gap:7px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-breakdown{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;
+  padding:4px 0!important;font-size:10px!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-breakdown>span:last-child{grid-column:auto!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-breakdown b{font-size:12px!important;margin-top:1px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-indicators{margin:2px 0!important;gap:3px!important;font-size:10px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-indicators .t{
+  --tw:19px!important;--th:26px!important;width:19px!important;height:26px!important;min-width:19px!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-tally{padding-top:4px!important;gap:6px!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-tally strong{font-size:clamp(21px,6dvh,32px)!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-muted{margin:4px 0 1px!important;line-height:1.2!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-result-row{
+  grid-template-columns:30px minmax(66px,1.1fr) minmax(75px,.9fr) minmax(50px,.75fr) minmax(124px,1.55fr)!important;
+  gap:4px!important;min-height:37px!important;padding:3px 6px!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-result-row .jr-counts{
+  grid-column:auto!important;display:flex!important;flex-wrap:nowrap!important;
+  justify-content:space-between!important;gap:2px!important;padding:0!important;border:0!important;white-space:nowrap!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-result-row .jr-counts span{
+  display:flex!important;flex-direction:column!important;align-items:center!important;font-size:9px!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-result-row .jr-counts b{font-size:11px!important;margin:0!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-transfer-row{min-height:38px!important;padding:3px 6px!important}
+}
+@media(max-width:600px) and (orientation:portrait){
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-agari-layout{grid-template-columns:1fr!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-hero{display:none!important}
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-result-row{
+  grid-template-columns:25px minmax(60px,1fr) minmax(65px,.9fr) minmax(52px,.8fr)!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-result-row .jr-counts{
+  grid-column:2/-1!important;justify-content:space-around!important
+ }
+ body.page-play .jr-overlay[data-stage]:not([data-stage="history"]) .jr-transfer-row{
+  grid-template-columns:24px minmax(70px,1fr) minmax(55px,.8fr) 11px minmax(61px,.8fr) minmax(54px,.8fr)!important;
+  gap:3px!important
+ }
+}
+/* Restore real dice depth and a bowl wide enough to contain all three rotating cubes. */
+@media(max-width:1000px){
+ body.page-play #chinchiroOverlay .chin-bowl{
+  width:min(365px,70vw,calc(162dvh - 243px))!important;max-width:100%!important;
+  aspect-ratio:1.62!important;border-width:clamp(6px,1.8dvh,10px)!important;
+  perspective:850px!important;overflow:hidden!important
+ }
+ body.page-play #chinchiroOverlay .dice-track{gap:clamp(7px,2vw,20px)!important;transform-style:preserve-3d!important}
+ body.page-play #chinchiroOverlay .die-position{
+  isolation:auto!important;transform-style:preserve-3d!important;--dieSize:clamp(19px,8.5dvh,42px)!important
+ }
+ body.page-play #chinchiroOverlay .die-position:nth-child(1){margin-top:clamp(5px,2.2dvh,12px)!important}
+ body.page-play #chinchiroOverlay .die-position:nth-child(2){margin-top:clamp(-14px,-2.7dvh,-6px)!important}
+ body.page-play #chinchiroOverlay .die-position:nth-child(3){margin-top:clamp(5px,2dvh,11px)!important}
+}

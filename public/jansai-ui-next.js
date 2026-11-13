@@ -154,6 +154,36 @@ function setupMobileTopAndQuick(){
  }
  document.body.append(quick);
 }
-function boot(){setupDice();setupMobileMatch();setupMobileTopAndQuick();}
+
+ // Adaptive whole-card scale; the match engine owns all result values.
+ function resultFitScale(width,height,availableWidth,availableHeight){
+   return Math.min(1,Math.max(.01,availableWidth/Math.max(1,width)),Math.max(.01,availableHeight/Math.max(1,height)));
+ }
+ function setupResultFit(){
+   const overlay=$('#janResultOverlay');if(!overlay)return;
+   const mobile=window.matchMedia('(max-width:1000px)');
+   let scheduled=false;
+   function fit(){
+     scheduled=false;
+     const card=overlay.querySelector('.jr-card');if(!card||overlay.hidden)return;
+     if(!mobile.matches||!['agari','transfer','match'].includes(overlay.dataset.stage)){
+       card.style.removeProperty('--jr-fit-scale');return;
+     }
+     const width=card.offsetWidth,height=card.offsetHeight;
+     if(width<1||height<1)return;
+     const vw=Math.min(window.innerWidth,document.documentElement.clientWidth||window.innerWidth)-14;
+     const vh=Math.min(window.innerHeight,document.documentElement.clientHeight||window.innerHeight)-12;
+     const scale=resultFitScale(width,height,Math.max(1,vw),Math.max(1,vh));
+     card.style.setProperty('--jr-fit-scale',String(Math.floor(scale*10000)/10000));
+   }
+   const schedule=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(fit)};
+   new MutationObserver(schedule).observe(overlay,{attributes:true,attributeFilter:['hidden','data-stage'],childList:true});
+   window.addEventListener('resize',schedule);
+   window.visualViewport?.addEventListener('resize',schedule);
+   mobile.addEventListener?.('change',schedule);
+   document.fonts?.ready.then(schedule);
+   schedule();
+ }
+ function boot(){setupDice();setupMobileMatch();setupMobileTopAndQuick();setupResultFit();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
