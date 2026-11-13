@@ -276,7 +276,23 @@ function resize(){
 }
 
 function animate(t){let active=false;for(const r of animations){const a=r.start,k=a.duration?Math.max(0,Math.min(1,(t-a.time)/a.duration)):1,e=1-Math.pow(1-k,3);r.group.position.lerpVectors(a.position,r.target,e);r.group.quaternion.slerpQuaternions(a.rotation,r.rotation,e);if(a.position.distanceTo(r.target)>35)r.group.position.y+=Math.sin(k*Math.PI)*18;if(k===1)animations.delete(r);else active=true;}return active;}
-function frame(t){raf=0;if(!enabled||document.hidden)return;try{if(dirty){syncTiles();dirty=false;}const active=animate(performance.now());for(const r of records.values())if(r.own)r.group.quaternion.copy(camera.quaternion);scene.updateMatrixWorld(true);layoutHUD();renderer.render(scene,camera);if(!firstFrameReady)ready3D();if(active)raf=requestAnimationFrame(frame)}catch(e){console.error(e);fallback('3D描画が停止しました。')}}
+function frame(t){raf=0;if(!enabled||document.hidden)return;try{
+ // Phase 1: establish WebGL before the match engine can start.
+ // Jansai3DReady must resolve without touching uninitialized game UI.
+ if(!firstFrameReady){scene.updateMatrixWorld(true);renderer.render(scene,camera);ready3D();return;}
+ // Phase 2: keep the loading cover until the match has populated its tiles.
+ if(!sceneHasTiles&&!document.querySelector('#hand .t,#tsumoSlot .t,#wallTiles1 .back-tile')){
+  if(!hydrationTimer)hydrationTimer=setTimeout(()=>{hydrationTimer=0;invalidate()},120);
+  return;
+ }
+ if(hydrationTimer){clearTimeout(hydrationTimer);hydrationTimer=0;}
+ if(dirty){syncTiles();dirty=false;}
+ const active=animate(performance.now());
+ for(const r of records.values())if(r.own)r.group.quaternion.copy(camera.quaternion);
+ scene.updateMatrixWorld(true);layoutHUD();renderer.render(scene,camera);
+ if(!document.body.classList.contains('scene-ready'))document.body.classList.add('scene-ready');
+ if(active)raf=requestAnimationFrame(frame);
+}catch(e){console.error('[雀彩 3D frame]',e);fallback('3D描画が停止しました：'+(e?.message||'原因不明'))}}
 function invalidate(){dirty=true;if(enabled&&!raf)raf=requestAnimationFrame(frame)}
 function hit(e){const rect=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(pointer,camera);const candidates=[...records.values()].filter(r=>r.own&&r.legal).map(r=>r.group);const hits=raycaster.intersectObjects(candidates,true);for(const h of hits){let o=h.object;while(o&&!o.userData.record)o=o.parent;if(o)return o.userData.record;}return null;}
 function activateTile(r){if(!enabled||!r?.legal||!r.node?.isConnected)return;r.node.click();invalidate()}
@@ -288,11 +304,11 @@ async function initialize(){if(!window.THREE)throw Error('3Dライブラリを�
  window.__jansuno3d={getStats:()=>({enabled,viewport:[w,h],camera:camera.type,tiles:records.size,animating:animations.size,geometry:renderer.info.memory.geometries,texture:renderer.info.memory.textures,calls:renderer.info.render.calls,quality:quality.value,pixelRatio:renderer.getPixelRatio(),shadows:renderer.shadowMap.enabled,ratio:[21,28,16.5],physicalBounds:(()=>{meshes.ivory.computeBoundingBox();meshes.red.computeBoundingBox();const box=meshes.ivory.boundingBox.clone().translate(new THREE.Vector3(0,0,1.75));box.union(meshes.red.boundingBox.clone().translate(new THREE.Vector3(0,0,-6.5)));return box.getSize(new THREE.Vector3()).toArray()})(),faceCount:faceMats.size,hiddenFaces:[...records.values()].filter(r=>r.hidden&&r.face).length}),projectTile:id=>{const r=records.get('id:'+id);if(!r)return null;const p=project(r.group.localToWorld(new THREE.Vector3(0,0,8.3))),b=host.getBoundingClientRect();return {x:p.x+b.x,y:p.y+b.y,legal:r.legal}},projectWorld:(x,y,z)=>project(new THREE.Vector3(x,y,z)),inspectLayout:()=>[...records.values()].map(r=>({key:r.key,own:r.own,zone:r.node?.closest('.meld-zone,.rv')?.id,position:r.group.position.toArray(),frontError:r.own?r.group.quaternion.angleTo(camera.quaternion):null})),centerPreview:()=>centerCanvas.toDataURL(),riichiCount:()=>riichiSticks.filter(s=>s.visible).length,facePreview:name=>faceURLs.get(name),hitTest:(x,y)=>hit({clientX:x,clientY:y})?.key, invalidate};
 }
 const startupMask=document.createElement('div');startupMask.id='jansaiStartupMask';startupMask.setAttribute('role','status');startupMask.textContent='3D卓を準備しています…';document.body.append(startupMask);
-let firstFrameReady=false;
+let firstFrameReady=false,hydrationTimer=0;
 function ready3D(){
  if(firstFrameReady)return;
  firstFrameReady=true;
- document.body.classList.add('scene-ready');
+ startupMask.textContent='対局データを準備しています…';
  window.__jansaiResolve3D?.();
 }
 function fallback(message){
