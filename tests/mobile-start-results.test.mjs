@@ -10,7 +10,9 @@ test('the game must not start until 3D is actually rendered',()=>{
  assert.match(html,/await window\.Jansai3DReady;/);
  assert.ok(html.indexOf('await window.Jansai3DReady;')<html.indexOf('engine.startMatch('));
  assert.match(html,/body\.page-play:not\(\.scene-ready\) #tb/);
- assert.match(scene,/renderer\.render\(scene,camera\);if\(!firstFrameReady\)ready3D\(\)/);
+ assert.match(scene,/if\(!firstFrameReady\)\{scene\.updateMatrixWorld\(true\);renderer\.render\(scene,camera\);ready3D\(\);return;\}/);
+ assert.match(scene,/if\(!sceneHasTiles&&!document\.querySelector/);
+ assert.match(scene,/if\(!document\.body\.classList\.contains\('scene-ready'\)\)/);
  assert.match(scene,/document\.body\.classList\.add\('scene-ready'\)/);
  assert.match(scene,/window\.__jansaiResolve3D\?\.\(\)/);
  assert.match(scene,/window\.__jansaiReject3D\?\.\(new Error\(message\)\)/);
@@ -50,5 +52,5 @@ test('all modal types are constrained to the mobile viewport',()=>{
  assert.match(css,/#chinchiroOverlay \.chin-bowl/);
 });
 test('PWA cache version includes startup gate and result screen changes',()=>{
- assert.match(file('sw.js'),/cloudflare-ws17-3d-start-results/);
+ assert.match(file('sw.js'),/cloudflare-ws18-3d-hydration/);
 });
