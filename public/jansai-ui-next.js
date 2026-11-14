@@ -14,7 +14,7 @@ function attachFlats(root){
     const x=readAngle(node,'--endX'),y=readAngle(node,'--endY');
     const value=ANGLES[`${x},${y}`]||1;
     const flat=document.createElement('div');flat.className='jan-die-flat';
-    flat.setAttribute('aria-label',`${value}の目`);flat.innerHTML=flatMarkup(value);
+    flat.setAttribute('aria-label',`${value}の目`);flat.setAttribute('data-value',String(value));flat.innerHTML=flatMarkup(value);
     node.append(flat);
   }
   return nodes;

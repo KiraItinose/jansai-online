@@ -36,13 +36,13 @@ function attach(track){
   if(!node.querySelector('.jan-match-face')){
    const face=document.createElement('div');face.className='jan-match-face';
    const result=VALUES[`${x},${y}`]||1;
-   face.setAttribute('role','img');face.setAttribute('aria-label',`${result}の目`);
+   face.setAttribute('role','img');face.setAttribute('aria-label',`${result}の目`);face.setAttribute('data-value',String(result));
    face.innerHTML=pipHTML(result);node.append(face);
   }
   return {node,cube,x,y};
  });
 }
-function stop(track){const run=runs.get(track);if(run){if(run.frame)cancelAnimationFrame(run.frame);run.resolve?.();runs.delete(track)}}
+function stop(track){const run=runs.get(track);if(run){if(run.frame)cancelAnimationFrame(run.frame);run.renderer?.stop();run.resolve?.();runs.delete(track)}}
 function play(track,rolling){
  if(!track)return Promise.resolve();styleOnce();stop(track);
  const dice=attach(track);
@@ -54,14 +54,16 @@ function play(track,rolling){
  }
  let finish;
  const completed=new Promise(resolve=>{finish=resolve});
- const state={frame:0,resolve:finish};runs.set(track,state);
+ const rootCanvas=root?.id==='chinchiroOverlay' ? window.JanDiceCanvas?.start?.(track,dice) : null;
+ const state={frame:0,resolve:finish,renderer:rootCanvas};runs.set(track,state);
  let start=null;
  function frame(now){
   if(runs.get(track)!==state)return;
   if(root&&(!root.isConnected||!root.classList.contains('chin-rolling'))){stop(track);return}
   if(start===null)start=now;
   const t=Math.min(1,(now-start)/DURATION),ease=1-Math.pow(1-t,3);
-  dice.forEach(({cube,x,y},i)=>{
+  rootCanvas?.draw(t,ease);
+  if(!rootCanvas)dice.forEach(({cube,x,y},i)=>{
    if(!cube)return;
    const dir=i===1?-1:1;
    const rx=x+dir*1080*(1-ease),ry=y-900*(1-ease),rz=720*(1-ease);
@@ -69,7 +71,7 @@ function play(track,rolling){
    cube.style.setProperty('transform',`translate3d(0,${bounce.toFixed(2)}px,0) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg)`,'important');
   });
   if(t<1)state.frame=requestAnimationFrame(frame);
-  else {state.frame=0;runs.delete(track);finish();}
+  else {state.frame=0;rootCanvas?.stop();runs.delete(track);finish();}
  }
  state.frame=requestAnimationFrame(frame);
  return completed;

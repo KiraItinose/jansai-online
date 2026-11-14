@@ -26,7 +26,7 @@ test('solo preview is available from the TOP without accessing the score engine'
 
 test('the PWA update advertises the new preview and spin assets',()=>{
  const sw=file('sw.js');
- assert.match(sw,/0\.5\.7-cloudflare-ws19-result-fit-dice/);
+ assert.match(sw,/0\.5\.7-cloudflare-ws20-real-dice/);
  for(const name of ['/app-shell.js','/lobby.css','/refinements.css'])
   assert.ok(sw.includes("'"+name+"'"));
 });

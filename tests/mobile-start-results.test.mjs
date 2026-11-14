@@ -49,9 +49,9 @@ test('all modal types are constrained to the mobile viewport',()=>{
  assert.match(css,/height:calc\(100dvh - 10px\)!important/);
  assert.match(css,/max-height:calc\(100dvh - 10px\)!important/);
  assert.match(css,/overflow:visible!important;overscroll-behavior:auto!important/);
- assert.match(css,/transform:scale\\(var\\(--jr-fit-scale,1\\)\\)!important/);
+ assert.match(css,/transform:scale\(var\(--jr-fit-scale,1\)\)!important/);
  assert.match(css,/#chinchiroOverlay \.chin-bowl/);
 });
 test('PWA cache version includes startup gate and result screen changes',()=>{
- assert.match(file('sw.js'),/cloudflare-ws19-result-fit-dice/);
+ assert.match(file('sw.js'),/cloudflare-ws20-real-dice/);
 });

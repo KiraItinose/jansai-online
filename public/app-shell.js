@@ -66,5 +66,9 @@ if(!play&&document.querySelector('#cc')&&!document.querySelector('#previewChinBt
  const nextCss=document.createElement('link');nextCss.rel='stylesheet';nextCss.href='jansai-ui-next.css';document.head.append(nextCss);
  // Final, single-purpose mobile layout layer is loaded after legacy visuals.
  const mobileCss=document.createElement('link');mobileCss.rel='stylesheet';mobileCss.href='jansai-mobile-v5.css';document.head.append(mobileCss);
+ // The smartphone dice skins load last, without changing scoring or the 3D table.
+ const diceCss=document.createElement('link');diceCss.rel='stylesheet';diceCss.href='chinchiro-real-dice.css';document.head.append(diceCss);
+ // Canvas dice run only on phones; CSS cubes remain the portable fallback.
+ const canvasScript=document.createElement('script');canvasScript.src='chinchiro-canvas.js';document.body.append(canvasScript);
  const nextScript=document.createElement('script');nextScript.src='jansai-ui-next.js';document.body.append(nextScript);
 })();
